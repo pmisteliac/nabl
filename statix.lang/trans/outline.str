@@ -6,6 +6,7 @@ imports
 
   signatures/statix/lang/-
   statix/lang/statics/-
+  statix/lang/generate
   statix/lang/pp
   pp
 
@@ -13,7 +14,7 @@ rules
 
   editor-outline:
     (_, _, ast, path, project-path) -> outline
-    with outline := <desugar-all;outline(|path)> ast
+    with outline := <desugar-all;eliminate-all;outline(|path)> ast
 
   outline(|path): ast -> [ Node("sort", sort-node*) 
                          , Node("relations", rel-node*)

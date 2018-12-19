@@ -29,6 +29,11 @@ signature
 
   relations
     in  : Type * TClass
+    reflexive, transitive inj : Type * Type {
+      [+inj],
+   	  LIST(+inj),
+   	  TUPLE(+inj)
+    }
 
   name resolution
     labels P I
@@ -134,8 +139,9 @@ rules
     C{x} -> s_rule, C{x} |-> d, @x.decl := d,
     d.kind := DeclaredC() | error "Rules can only be defined for declared constraints.",
     d : ty, ty != FUN(_, _) | error "Use `c(...) = ... | ...` for functional constraints." @x,
-    tys is `in-types` of ty,
-    Map1T(Match)[[ args ^ (s_rule) : tys ]].
+    intys is `in-types` of ty,
+    Map1T(Match)[[ args ^ (s_rule) : atys ]],
+    atys <inj? intys.
 
   RuleHead[[ F(x, inargs, outarg) ^ (s_rule, s_body) ]] :=
     C{x} -> s_rule, C{x} |-> d, @x.decl := d,
@@ -143,14 +149,17 @@ rules
     d : ty, ty != PRED(_) | error "Use `c(...) | ...` for non-functional constraints." @x,
     intys is `in-types` of ty,
     outty is `out-type` of ty,
-    Map1T(Match)[[ inargs ^ (s_rule) : intys ]],
-    Term(Build)[[ outarg ^ (s_body) : outty ]].
+    Map1T(Match)[[ inargs ^ (s_rule) : atys ]],
+    atys <inj? intys,
+    Term(Build)[[ outarg ^ (s_body) : rty ]],
+    rty <inj? outty.
 
   [[ C(x, args) ^ (s) ]] :=
     C{x} -> s, C{x} |-> d, @x.decl := d,
     d : ty,
-    tys is `inout-types` of ty,
-    Map1T(Build)[[ args ^ (s) : tys ]].
+    ptys is `inout-types` of ty,
+    Map1T(Build)[[ args ^ (s) : atys ]],
+    atys <inj? ptys.
 
   [[ LC(x) ^ (s) : ty ]] :=
     C{x} -> s, C{x} |-> d, @x.decl := d,
@@ -159,8 +168,10 @@ rules
   Term(V)[[ COp(x, args) ^ (s) : outty ]] :=
     C{x} -> s, C{x} |-> d, @x.decl := d,
     d : ty, ty != PRED(_) | error "Inline notation can only be used for functional constraints.",
+    intys is `in-types` of ty,
     outty is `out-type` of ty,
-    Map1T(Term(V))[[ args ^ (s) : intys ]].
+    Map1T(Term(V))[[ args ^ (s) : atys ]],
+    atys <inj? intys.
 
 /******************************************************************
  * Relations                                                      *
@@ -435,6 +446,11 @@ rules
     d : ty !,
     d.kind := k, k != SortAlias() | error $[Cannot refer to alias [d]].
 
+  [[ InjDecl(inj, sort) ^ (s) ]] :=
+    SortRef[[ inj ^ (s) : injty ]],
+    RealSortRef[[ sort ^ (s) : ty ]],
+    injty <inj! ty.
+
   SortRef[[ IntSort() ^ (_) : INT() ]].
   SortRef[[ StringSort() ^ (_) : STRING() ]].
   SortRef[[ OccurrenceSort() ^ (_) : OCCURRENCE() ]].
@@ -497,8 +513,9 @@ rules
     Map1T(Term(V))[[ ts ^ (s) : tys ]].
   Term(V)[[ Op(x, args) ^ (s) : ty ]] :=
     Op{x} -> s, Op{x} |-> d, @x.decl := Op{x},
-    d : OP(tys, ty),
-    Map1T(Term(V))[[ args ^ (s) : tys ]].
+    d : OP(ptys, ty),
+    Map1T(Term(V))[[ args ^ (s) : atys ]],
+    atys <inj? ptys.
   Term(V)[[ Str(_) ^ (_) : STRING() ]].
 //Term(V)[[ StrBuild(ts) ^ (s) : STRING() ]] :=
 //  Map1T(Term(V))[[ ts ^ (s) : _ ]].
