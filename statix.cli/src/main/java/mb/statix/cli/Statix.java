@@ -78,6 +78,14 @@ public class Statix {
                     throws MetaborgException, IOException {
         new StatixRepl(this).run(file);
     }
+    
+    @Command(name = "complete") public void complete(
+    		@Parameters(paramLabel = "SPEC", description = "Statix specification to use for completion") String specFile,
+    		@Option(names = { "-i", "--input" }, paramLabel = "INPUT", description = "Input file to complete") String inputFile
+    		) throws MetaborgException, IOException, InterruptedException {
+    	new StatixComplete(this, this.S).run(specFile, inputFile);
+    }
+
 
     private ILanguageImpl loadStxLang() throws MetaborgException {
         ILanguageImpl lang;
