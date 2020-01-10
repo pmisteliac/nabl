@@ -80,10 +80,9 @@ public class Statix {
     }
     
     @Command(name = "complete") public void complete(
-    		@Parameters(paramLabel = "SPEC", description = "Statix specification to use for completion") String specFile,
-    		@Option(names = { "-i", "--input" }, paramLabel = "INPUT", description = "Input file to complete") String inputFile
-    		) throws MetaborgException, IOException, InterruptedException {
-    	new StatixComplete(this, this.S).run(specFile, inputFile);
+    		@Parameters(paramLabel = "FILE", description = "Statix test file to complete") String file)
+    				throws MetaborgException, IOException, InterruptedException {
+    	new StatixComplete(this, this.S, this.context).run(file);
     }
 
 
