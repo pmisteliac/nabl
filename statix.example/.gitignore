@@ -11,3 +11,7 @@
 *.name-resolution
 *.unifier
 *.stxresult
+
+*.log
+.idea/
+*.iml

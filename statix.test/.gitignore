@@ -15,3 +15,7 @@
 *.symbolic
 
 *.stxresult
+
+*.log
+.idea/
+*.iml
