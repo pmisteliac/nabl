@@ -1,0 +1,22 @@
+resolve {x}
+
+	typeOf(x) == BOOL()
+
+signature
+
+	sorts Exp constructors
+		True : Exp
+		And : Exp * Exp -> Exp
+		
+	sorts Type constructors
+		BOOL : Type
+		
+  	constraints
+    	typeOf : Exp -> Type
+
+rules
+
+  	typeOf(True()) = BOOL().
+  	typeOf(And(x, y)) = BOOL() :-
+  		typeOf(x) == BOOL(),
+  		typeOf(y) == BOOL().
