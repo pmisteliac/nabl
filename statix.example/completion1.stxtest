@@ -1,22 +1,70 @@
-resolve {e}
+resolve {s e T}
 
-	typeOf(e) == BOOL()
+	new s, typeOf(s, Let([
+		//Bind("x", BOOL(), True()),
+		//Bind("y", INT(), Zero())
+	], e)) == T
 
 signature
 
-	sorts Exp constructors
-		True : Exp
-		And : Exp * Exp -> Exp
+	sorts ID = string                         	// $x$
+
+	sorts Exp constructors						// $e$ :=
+		Zero : Exp								//      | 0
+		True : Exp								// 		| true
+		And : Exp * Exp -> Exp					//		| $e$ && $e$
+		Plus : Exp * Exp -> Exp			      	//		| $e$ + $e$
+		Let : list(Bind) * Exp -> Exp   		//      | let $b*$ in $e$
+		Var : ID -> Exp							//		| $x$
+		
+  	sorts Bind constructors                   	// $b$ :=
+    	Bind : ID * Type * Exp -> Bind   		//      | $x$ : $T$ = $e$
 		
 	sorts Type constructors
 		BOOL : Type
+		INT : Type
+    	UNIT : Type
 		
   	constraints
-    	typeOf : Exp -> Type
+    	typeOf : scope * Exp -> Type
 
+  	relations
+    	typeOfDecl : occurrence -> Type
+
+  	namespaces
+    	Var  : string
+
+  	name-resolution
+    	labels P
+    	resolve Var filter P* min $ < P
+    	
 rules
 
-  	typeOf(True()) = BOOL().
-  	typeOf(And(x, y)) = BOOL() :-
-  		typeOf(x) == BOOL(),
-  		typeOf(y) == BOOL().
+  	typeOf(_, True()) = BOOL().
+  	
+  	typeOf(_, Zero()) = INT().
+  	
+  	typeOf(s, And(x, y)) = BOOL() :-
+  		typeOf(s, x) == BOOL(),
+  		typeOf(s, y) == BOOL().
+  		
+	typeOf(s, Plus(x, y)) = INT() :-
+		typeOf(s, x) == INT(),
+		typeOf(s, y) == INT().
+	
+  	typeOf(s, Let(binds, e)) = T :- {s_let}
+    	new s_let, s_let -P-> s,
+    	bindsOk(s, binds, s_let),
+    	typeOf(s_let, e) == T,
+    	binds != []. // additive
+    	
+  	typeOf(s, Var(x)) = T :- {p d}
+    	typeOfDecl of Var{x@x} in s |-> [(p, (d, T))].
+
+  	bindOk : scope * Bind * scope
+
+  	bindOk(s, Bind(x, T, e), s_bnd) :-
+	    s_bnd -> Var{x@x} with typeOfDecl T,
+    	typeOf(s, e) == T.
+
+  	bindsOk maps bindOk(*, list(*), *)

@@ -56,10 +56,10 @@ public class Paret {
     public SearchStrategy<SearchState, SearchState> search() {
         // @formatter:off
         return S.seq(searchExp())
-               .$(S.marker("generateLex"))
-               .$(generateLex())
-               .$(S.marker("done"))
-               .$();
+                  .$(S.marker("generateLex"))
+                  .$(generateLex())
+                  .$(S.marker("done"))
+                  .$();
         // @formatter:on
     }
 
@@ -71,10 +71,18 @@ public class Paret {
     
     public SearchStrategy<SearchState, SearchState> complete() {
     	return S.seq(S.infer())
-    			.$(S.limit(1, S.select(CUser.class, new Any<>())))
-                .$(S.expand(Mode.ENUM))
-                .$(S.infer())
-                .$();
+    		  	  .$(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))		// Selects a rule constraint
+                  .$(S.expand(Mode.ENUM))											// Expands the rule
+                  .$(S.infer())														// Discards any alternatives that cannot be solved
+                  .$(S.fix2(
+                	 S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, new Any<>())))
+                        .$(S.resolve())
+                        .$(),
+                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),		//.$(S.dropAst())
+                     c -> !(c instanceof CResolveQuery),
+                     10)
+                  )
+                  .$();
     }
 
     // generation of expressions
@@ -133,8 +141,8 @@ public class Paret {
         // @formatter:off
         return S.limit(limit, S.concatAlt(
             // TWEAK Resolve queries first, to improve inference
-            S.select(CResolveQuery.class, new Any<>()),
-            S.select(CUser.class, /*Paret::predWeights*/ new Match(GEN_RE))
+            S.select(Mode.RND, CResolveQuery.class, new Any<>()),
+            S.select(Mode.RND, CUser.class, /*Paret::predWeights*/ new Match(GEN_RE))
         ));
         // @formatter:on
     }
@@ -169,7 +177,7 @@ public class Paret {
 
     private SearchStrategy<SearchState, SearchState> expandLex() {
         // @formatter:off
-        return S.seq(S.select(CUser.class, new Match(IS_RE)))
+        return S.seq(S.select(Mode.RND, CUser.class, new Match(IS_RE)))
                .$(S.limit(1, S.seq(S.expand(Mode.RND, 1, idWeights)).$(S.infer()).$()))
                .$();
         // @formatter:on

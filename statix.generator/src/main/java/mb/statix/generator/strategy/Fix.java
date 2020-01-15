@@ -19,6 +19,7 @@ import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.util.StreamUtil;
+import mb.statix.solver.IConstraint;
 import mb.statix.spec.Spec;
 
 public class Fix extends SearchStrategy<SearchState, SearchState> {
@@ -26,11 +27,11 @@ public class Fix extends SearchStrategy<SearchState, SearchState> {
     private final SearchStrategy<SearchState, SearchState> search;
     private final SearchStrategy<SearchState, SearchState> infer;
     private final SearchStrategy<SearchState, SearchState> searchAndInfer;
-    private final Predicate1<CUser> done;
+    private final Predicate1<IConstraint> done;
     private final int maxConsecutiveFailures;
 
     public Fix(Spec spec, SearchStrategy<SearchState, SearchState> search,
-            SearchStrategy<SearchState, SearchState> infer, Predicate1<CUser> done, int maxConsecutiveFailures) {
+            SearchStrategy<SearchState, SearchState> infer, Predicate1<IConstraint> done, int maxConsecutiveFailures) {
         super(spec);
         this.search = search;
         this.infer = infer;
@@ -63,7 +64,7 @@ public class Fix extends SearchStrategy<SearchState, SearchState> {
                 }
                 final SearchNode<SearchState> next = nodes.next();
                 if(Streams.stream(next.output().constraintsAndDelays())
-                        .allMatch(c -> (c instanceof CUser && done.test((CUser) c)))) {
+                        .allMatch(c -> done.test(c))) {
                     return Optional.of(next);
                 }
                 final SearchNodes<SearchState> nextNodes = searchAndInfer.apply(ctx, next);

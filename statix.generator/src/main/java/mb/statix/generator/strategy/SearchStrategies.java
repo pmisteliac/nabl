@@ -76,12 +76,16 @@ public final class SearchStrategies {
 
     public final Fix fix(SearchStrategy<SearchState, SearchState> search,
             SearchStrategy<SearchState, SearchState> infer, Predicate1<CUser> done, int maxConsecutiveFailures) {
+        return new Fix(spec, search, infer, c -> c instanceof CUser && done.test((CUser)c), maxConsecutiveFailures);
+    }
+    public final Fix fix2(SearchStrategy<SearchState, SearchState> search,
+            SearchStrategy<SearchState, SearchState> infer, Predicate1<IConstraint> done, int maxConsecutiveFailures) {
         return new Fix(spec, search, infer, done, maxConsecutiveFailures);
     }
 
-    public final <C extends IConstraint> Select<C> select(Class<C> cls, Predicate1<C> include) {
+    public final <C extends IConstraint> Select<C> select(Mode mode, Class<C> cls, Predicate1<C> include) {
         // full classes instead of lambda's to add forwarding toString
-        return new Select<>(spec, cls, new Function1<SearchState, Function1<C, Double>>() {
+        return new Select<>(spec, mode, cls, new Function1<SearchState, Function1<C, Double>>() {
 
             @Override public Function1<C, Double> apply(SearchState t) {
                 return new Function1<C, Double>() {
@@ -105,9 +109,9 @@ public final class SearchStrategies {
         });
     }
 
-    public final <C extends IConstraint> Select<C> select(Class<C> cls,
+    public final <C extends IConstraint> Select<C> select(Mode mode, Class<C> cls,
             Function1<SearchState, Function1<C, Double>> weight) {
-        return new Select<>(spec, cls, weight);
+        return new Select<>(spec, mode, cls, weight);
     }
 
     public final FilterConstraints filter(Predicate1<IConstraint> p) {
