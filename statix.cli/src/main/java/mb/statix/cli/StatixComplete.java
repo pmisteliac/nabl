@@ -62,7 +62,7 @@ public class StatixComplete {
 
         final StatixGenerator statixGen = new StatixGenerator(this.spoofax, this.context, resource);
         final Spec spec = statixGen.spec();
-        final TermCompleter com = new TermCompleter(spec, statixGen.constraint(), new Paret(spec).search(), searchLog);
+        final TermCompleter com = new TermCompleter(spec, statixGen.constraint(), new Paret(spec).complete(), searchLog);
         final Stream<SearchState> resultStream = com.apply().nodes().map(sn -> {
             searchLog.success(sn);
             return sn.output();

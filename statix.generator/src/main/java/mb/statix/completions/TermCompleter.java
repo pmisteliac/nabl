@@ -59,7 +59,8 @@ public final class TermCompleter {
             }
 
         };
-        return strategy.apply(ctx, new SearchNode<>(ctx.nextNodeId(), initalState, null, "init"));
+        SearchNode<SearchState> initNode = new SearchNode<>(ctx.nextNodeId(), initalState, null, "init");
+        return strategy.apply(ctx, initNode);
     }
 
 }

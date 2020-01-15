@@ -1,6 +1,6 @@
-resolve {x}
+resolve {e}
 
-	typeOf(x) == BOOL()
+	typeOf(e) == BOOL()
 
 signature
 

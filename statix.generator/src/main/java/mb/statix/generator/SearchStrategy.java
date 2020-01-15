@@ -7,7 +7,7 @@ import mb.statix.spec.Spec;
 public abstract class SearchStrategy<I extends SearchState, O extends SearchState> {
 
     public enum Mode {
-        ENUM, RND
+        ENUM, ENUM_SHUFFLED, RND
     }
 
     private final Spec spec;

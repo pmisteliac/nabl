@@ -91,7 +91,10 @@ final class Expand extends SearchStrategy<FocusedSearchState<CUser>, SearchState
 
         final Stream<SearchNode<SearchState>> nodes;
         switch(mode) {
-            case ENUM:
+	        case ENUM:
+	            nodes = newNodes.stream().map(p -> p.getKey());
+	            break;
+            case ENUM_SHUFFLED:
                 Collections.shuffle(newNodes, ctx.rnd()); // Important!
                 nodes = newNodes.stream().map(p -> p.getKey());
                 break;

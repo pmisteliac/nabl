@@ -68,6 +68,14 @@ public class Paret {
     private SearchStrategy<SearchState, SearchState> inferDelayAndDrop() {
         return S.seq(S.infer()).$(S.delayStuckQueries()).$(S.dropAst()).$();
     }
+    
+    public SearchStrategy<SearchState, SearchState> complete() {
+    	return S.seq(S.infer())
+    			.$(S.limit(1, S.select(CUser.class, new Any<>())))
+                .$(S.expand(Mode.ENUM))
+                .$(S.infer())
+                .$();
+    }
 
     // generation of expressions
 
