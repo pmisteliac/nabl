@@ -71,14 +71,14 @@ public class Paret {
     
     public SearchStrategy<SearchState, SearchState> complete() {
     	return S.seq(S.infer())
-    		  	  .$(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))		// Selects a rule constraint
-                  .$(S.expand(Mode.ENUM))											// Expands the rule
-                  .$(S.infer())														// Discards any alternatives that cannot be solved
+    		  	  .$(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))
+                  .$(S.expand(Mode.ENUM))
+                  .$(S.infer())
                   .$(S.fix2(
                 	 S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, new Any<>())))
                         .$(S.resolve())
                         .$(),
-                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),		//.$(S.dropAst())
+                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
                      c -> !(c instanceof CResolveQuery),
                      10)
                   )
