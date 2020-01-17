@@ -13,8 +13,7 @@ final class Match<I1 extends SearchState, I2 extends SearchState, O extends Sear
     private final SearchStrategy<I2, O> s2;
     private final SearchStrategy<I1, O> s1;
 
-    Match(Spec spec, SearchStrategy<I1, O> s1, SearchStrategy<I2, O> s2) {
-        super(spec);
+    Match(SearchStrategy<I1, O> s1, SearchStrategy<I2, O> s2) {
         this.s2 = s2;
         this.s1 = s1;
     }

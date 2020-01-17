@@ -13,8 +13,7 @@ final class Limit<I extends SearchState, O extends SearchState> extends SearchSt
     private final SearchStrategy<I, O> s;
     private final int n;
 
-    Limit(Spec spec, int n, SearchStrategy<I, O> s) {
-        super(spec);
+    Limit(int n, SearchStrategy<I, O> s) {
         this.s = s;
         this.n = n;
     }

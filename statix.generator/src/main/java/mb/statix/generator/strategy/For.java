@@ -17,8 +17,7 @@ final class For<I extends SearchState, O extends SearchState> extends SearchStra
     private final SearchStrategy<I, O> s;
     private final int n;
 
-    For(Spec spec, int n, SearchStrategy<I, O> s) {
-        super(spec);
+    For(int n, SearchStrategy<I, O> s) {
         this.s = s;
         this.n = n;
     }

@@ -15,8 +15,7 @@ import mb.statix.spec.Spec;
 final class Repeat<I extends SearchState, O extends SearchState> extends SearchStrategy<I, O> {
     private final SearchStrategy<I, O> s;
 
-    Repeat(Spec spec, SearchStrategy<I, O> s) {
-        super(spec);
+    Repeat(SearchStrategy<I, O> s) {
         this.s = s;
     }
 

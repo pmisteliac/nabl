@@ -25,10 +25,6 @@ import mb.statix.spec.Spec;
 
 final class CanResolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, FocusedSearchState<CResolveQuery>> {
 
-    CanResolve(Spec spec) {
-        super(spec);
-    }
-
     @Override protected SearchNodes<FocusedSearchState<CResolveQuery>> doApply(SearchContext ctx,
             SearchNode<FocusedSearchState<CResolveQuery>> node) {
         FocusedSearchState<CResolveQuery> input = node.output();
@@ -43,7 +39,7 @@ final class CanResolve extends SearchStrategy<FocusedSearchState<CResolveQuery>,
 
         final Boolean isAlways;
         try {
-            isAlways = query.min().getDataEquiv().isAlways(spec()).orElse(null);
+            isAlways = query.min().getDataEquiv().isAlways(ctx.spec()).orElse(null);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -56,7 +52,7 @@ final class CanResolve extends SearchStrategy<FocusedSearchState<CResolveQuery>,
         final LabelWF<ITerm> labelWF = RegExpLabelWF.of(query.filter().getLabelWF());
         final LabelOrder<ITerm> labelOrd = new RelationLabelOrder(query.min().getLabelOrder());
         final DataWF<ITerm, CEqual> dataWF =
-                new ResolveDataWF(spec(), state, completeness, query.filter().getDataWF(), query);
+                new ResolveDataWF(ctx.spec(), state, completeness, query.filter().getDataWF(), query);
 
         // @formatter:off
         final NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution = new NameResolution<>(

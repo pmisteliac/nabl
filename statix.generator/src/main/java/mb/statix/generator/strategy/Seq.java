@@ -23,8 +23,7 @@ final class Seq<I extends SearchState, O extends SearchState> extends SearchStra
 
     private final List<SearchStrategy<?, ?>> ss;
 
-    private Seq(Spec spec, List<SearchStrategy<?, ?>> ss) {
-        super(spec);
+    private Seq(List<SearchStrategy<?, ?>> ss) {
         this.ss = ss;
     }
 
@@ -50,11 +49,9 @@ final class Seq<I extends SearchState, O extends SearchState> extends SearchStra
 
     public static class Builder<I extends SearchState, O extends SearchState> {
 
-        private final Spec spec;
         private final ImmutableList.Builder<SearchStrategy<?, ?>> ss = ImmutableList.builder();
 
-        public Builder(Spec spec, SearchStrategy<I, O> s) {
-            this.spec = spec;
+        public Builder(SearchStrategy<I, O> s) {
             ss.add(s);
         }
 
@@ -64,7 +61,7 @@ final class Seq<I extends SearchState, O extends SearchState> extends SearchStra
         }
 
         public Seq<I, O> $() {
-            return new Seq<>(spec, ss.build());
+            return new Seq<>(ss.build());
         }
 
     }

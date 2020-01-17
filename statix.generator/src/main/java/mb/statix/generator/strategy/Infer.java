@@ -13,15 +13,11 @@ import mb.statix.spec.Spec;
 
 final class Infer extends SearchStrategy<SearchState, SearchState> {
 
-    Infer(Spec spec) {
-        super(spec);
-    }
-
     @Override public SearchNodes<SearchState> doApply(SearchContext ctx, SearchNode<SearchState> node) {
         final SearchState state = node.output();
         final SolverResult resultConfig;
         try {
-            resultConfig = Solver.solve(spec(), state.state(), state.constraints(), state.delays(),
+            resultConfig = Solver.solve(ctx.spec(), state.state(), state.constraints(), state.delays(),
                     state.completeness(), new NullDebugContext());
         } catch(InterruptedException e) {
             throw new RuntimeException(e);

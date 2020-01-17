@@ -30,12 +30,11 @@ public class Fix extends SearchStrategy<SearchState, SearchState> {
     private final Predicate1<IConstraint> done;
     private final int maxConsecutiveFailures;
 
-    public Fix(Spec spec, SearchStrategy<SearchState, SearchState> search,
+    public Fix(SearchStrategy<SearchState, SearchState> search,
             SearchStrategy<SearchState, SearchState> infer, Predicate1<IConstraint> done, int maxConsecutiveFailures) {
-        super(spec);
         this.search = search;
         this.infer = infer;
-        this.searchAndInfer = new SearchStrategies(spec()).seq(search).$(infer).$();
+        this.searchAndInfer = new SearchStrategies().seq(search).$(infer).$();
         this.done = done;
         this.maxConsecutiveFailures = maxConsecutiveFailures;
     }

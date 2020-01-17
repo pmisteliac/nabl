@@ -1,18 +1,13 @@
-resolve {s e T}
+resolve {s e T e1 e2}
 
 	new s, typeOf(s, Let([
 		Bind("b", BOOL(), True()),
-		Bind("i", INT(), Zero()),
+		e,
 		Bind("f", FUN([BOOL(), INT()], BOOL()), Fun([
 			Param("a", BOOL()),
 			Param("b", INT())
 		], Var("a")))
-	], e)) == BOOL()
-
-//	new s, typeOf(s, Let([
-//		Bind("x", BOOL(), True()),
-//		Bind("y", INT(), Zero())
-//	], e)) == BOOL()
+	], Plus(Var("i"), Zero()))) == T
 
 signature
 
@@ -90,8 +85,11 @@ rules
 	typeOf(s, Call(x, es)) = T :- {FT PT AT p d}
 		typeOfDecl of Var{x@x} in s |-> [(p, (d, FT))],
 		FT == FUN(PT, T),
-		typesOf(s, es) == AT,
-		AT == PT.
+		typesOk(s, es, PT).
+		
+	typesOk : scope * list(Exp) * list(Type)
+	typesOk(s, [], []).
+	typesOk(s, [e|es], [t|ts]) :- typeOf(s, e) == t, typesOk(s, es, ts).
 		
 	typesOf maps typeOf(*, list(*)) = list(*)
 

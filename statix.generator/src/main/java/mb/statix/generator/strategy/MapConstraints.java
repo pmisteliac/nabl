@@ -19,8 +19,7 @@ final class MapConstraints extends SearchStrategy<SearchState, SearchState> {
 
     private final Function1<IConstraint, IConstraint> f;
 
-    MapConstraints(Spec spec, Function1<IConstraint, IConstraint> f) {
-        super(spec);
+    MapConstraints(Function1<IConstraint, IConstraint> f) {
         this.f = f;
     }
 
@@ -29,7 +28,7 @@ final class MapConstraints extends SearchStrategy<SearchState, SearchState> {
         final IState.Immutable state = input.state();
         final Set.Immutable<IConstraint> constraints =
                 input.constraints().stream().map(f::apply).collect(CapsuleCollectors.toSet());
-        final ICompleteness.Transient completeness = Completeness.Transient.of(spec());
+        final ICompleteness.Transient completeness = Completeness.Transient.of(ctx.spec());
         completeness.addAll(constraints, state.unifier());
         completeness.addAll(input.delays().keySet(), state.unifier());
         final SearchState output = input.replace(state, constraints, input.delays(), completeness.freeze());

@@ -17,8 +17,7 @@ public final class Try extends SearchStrategy<SearchState, SearchState> {
 
     private final SearchStrategy<SearchState, SearchState> s;
 
-    public Try(Spec spec, SearchStrategy<SearchState, SearchState> s) {
-        super(spec);
+    public Try(SearchStrategy<SearchState, SearchState> s) {
         this.s = s;
     }
 

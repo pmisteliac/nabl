@@ -27,8 +27,7 @@ final class Select<C extends IConstraint> extends SearchStrategy<SearchState, Fo
     private final Class<C> cls;
     private final Function1<SearchState, Function1<C, Double>> weight;
 
-    Select(Spec spec, Mode mode, Class<C> cls, Function1<SearchState, Function1<C, Double>> weight) {
-        super(spec);
+    Select(Mode mode, Class<C> cls, Function1<SearchState, Function1<C, Double>> weight) {
         this.mode = mode;
         this.cls = cls;
         this.weight = weight;

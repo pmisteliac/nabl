@@ -10,15 +10,15 @@ public abstract class SearchStrategy<I extends SearchState, O extends SearchStat
         ENUM, ENUM_SHUFFLED, RND
     }
 
-    private final Spec spec;
+//    private final Spec spec;
+//
+//    public SearchStrategy(Spec spec) {
+//        this.spec = spec;
+//    }
 
-    public SearchStrategy(Spec spec) {
-        this.spec = spec;
-    }
-
-    protected Spec spec() {
-        return this.spec;
-    }
+//    protected Spec spec() {
+//        return this.spec;
+//    }
 
     public final SearchNodes<O> apply(SearchContext ctx, SearchNode<I> node) {
         return doApply(ctx, node);

@@ -20,8 +20,7 @@ final class Require<I extends SearchState, O extends SearchState> extends Search
 
     private final SearchStrategy<I, O> s;
 
-    Require(Spec spec, SearchStrategy<I, O> s) {
-        super(spec);
+    Require(SearchStrategy<I, O> s) {
         this.s = s;
     }
 

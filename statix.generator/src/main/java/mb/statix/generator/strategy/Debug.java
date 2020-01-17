@@ -13,8 +13,7 @@ final class Debug<I extends SearchState, O extends SearchState> extends SearchSt
     private final Action1<SearchNode<O>> debug;
     private final SearchStrategy<I, O> s;
 
-    Debug(Spec spec, Action1<SearchNode<O>> debug, SearchStrategy<I, O> s) {
-        super(spec);
+    Debug(Action1<SearchNode<O>> debug, SearchStrategy<I, O> s) {
         this.debug = debug;
         this.s = s;
     }

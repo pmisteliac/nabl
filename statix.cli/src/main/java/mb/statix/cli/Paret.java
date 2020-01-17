@@ -50,7 +50,7 @@ public class Paret {
 
     public Paret(Spec spec) {
         this.spec = spec;
-        this.S = new SearchStrategies(spec);
+        this.S = new SearchStrategies();
     }
 
     public SearchStrategy<SearchState, SearchState> search() {
@@ -82,6 +82,7 @@ public class Paret {
                      c -> !(c instanceof CResolveQuery),
                      10)
                   )
+                  //.$(S.expandDeterministic())
                   .$();
     }
 

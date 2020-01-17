@@ -1,6 +1,8 @@
 package mb.statix.completions;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.SetMultimap;
+
 import mb.statix.generator.SearchContext;
 import mb.statix.generator.SearchLogger;
 import mb.statix.generator.SearchState;
@@ -9,6 +11,8 @@ import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
+import mb.statix.spec.Rule;
+import mb.statix.spec.RuleUtil;
 import mb.statix.spec.Spec;
 
 import java.util.Random;
@@ -45,6 +49,18 @@ public final class TermCompleter {
         final AtomicInteger nodeId = new AtomicInteger();
         final Random rnd = new Random(seed);
         final SearchContext ctx = new SearchContext() {
+        	
+        	private final SetMultimap<String, Rule> unorderedRules = RuleUtil.makeUnordered(spec.rules());
+
+			@Override
+			public Spec spec() {
+				return spec;
+			}
+
+			@Override
+			public SetMultimap<String, Rule> getUnorderedRules() {
+				return unorderedRules;
+			}
 
             @Override public Random rnd() {
                 return rnd;

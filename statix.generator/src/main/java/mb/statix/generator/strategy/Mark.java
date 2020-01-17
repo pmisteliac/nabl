@@ -11,8 +11,7 @@ final class Mark<I extends SearchState> extends SearchStrategy<I, I> {
 
     private final String marker;
 
-    public Mark(Spec spec, String marker) {
-        super(spec);
+    public Mark(String marker) {
         this.marker = "<" + marker + ">";
     }
 

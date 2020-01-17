@@ -34,10 +34,6 @@ import mb.statix.spec.Spec;
 
 final class DelayStuckQueries extends SearchStrategy<SearchState, SearchState> {
 
-    public DelayStuckQueries(Spec spec) {
-        super(spec);
-    }
-
     @Override protected SearchNodes<SearchState> doApply(SearchContext ctx, SearchNode<SearchState> node) {
         final SearchState input = node.output();
         final IState.Immutable state = input.state();
@@ -45,7 +41,7 @@ final class DelayStuckQueries extends SearchStrategy<SearchState, SearchState> {
 
         final java.util.Map<IConstraint, Delay> delays = Maps.newHashMap();
         input.constraints().stream().filter(c -> c instanceof CResolveQuery).map(c -> (CResolveQuery) c).forEach(q -> {
-            checkDelay(q, state, completeness).ifPresent(d -> {
+            checkDelay(ctx, q, state, completeness).ifPresent(d -> {
                 delays.put(q, d);
             });
         });
@@ -55,7 +51,7 @@ final class DelayStuckQueries extends SearchStrategy<SearchState, SearchState> {
         return SearchNodes.of(node, this::toString, new SearchNode<>(ctx.nextNodeId(), newState, node, desc));
     }
 
-    private Optional<Delay> checkDelay(CResolveQuery query, IState.Immutable state,
+    private Optional<Delay> checkDelay(SearchContext ctx, CResolveQuery query, IState.Immutable state,
             ICompleteness.Immutable completeness) {
         final IUniDisunifier unifier = state.unifier();
 
@@ -69,7 +65,7 @@ final class DelayStuckQueries extends SearchStrategy<SearchState, SearchState> {
 
         final Boolean isAlways;
         try {
-            isAlways = query.min().getDataEquiv().isAlways(spec()).orElse(null);
+            isAlways = query.min().getDataEquiv().isAlways(ctx.spec()).orElse(null);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +77,7 @@ final class DelayStuckQueries extends SearchStrategy<SearchState, SearchState> {
         final LabelWF<ITerm> labelWF = RegExpLabelWF.of(query.filter().getLabelWF());
         final LabelOrder<ITerm> labelOrd = new RelationLabelOrder(query.min().getLabelOrder());
         final DataWF<ITerm, CEqual> dataWF =
-                new ResolveDataWF(spec(), state, completeness, query.filter().getDataWF(), query);
+                new ResolveDataWF(ctx.spec(), state, completeness, query.filter().getDataWF(), query);
 
         // @formatter:off
         final NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution = new NameResolution<>(

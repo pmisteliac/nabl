@@ -9,10 +9,6 @@ import mb.statix.spec.Spec;
 
 final class Identity<I extends SearchState> extends SearchStrategy<I, I> {
 
-    Identity(Spec spec) {
-        super(spec);
-    }
-
     @Override protected SearchNodes<I> doApply(SearchContext ctx, SearchNode<I> node) {
         return SearchNodes.of(node, this::toString, node);
     }

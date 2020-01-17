@@ -25,33 +25,31 @@ import mb.statix.spec.Spec;
 
 public final class SearchStrategies {
 
-    private final Spec spec;
-
-    public SearchStrategies(Spec spec) {
-        this.spec = spec;
-    }
-
     // Methods return concrete types for easier IDE navigation. Use `Open Return Type` to go to implementation directly.
 
     public final <I extends SearchState, O extends SearchState> Limit<I, O> limit(int n, SearchStrategy<I, O> s) {
-        return new Limit<>(spec, n, s);
+        return new Limit<>(n, s);
     }
 
     public final <I extends SearchState, O extends SearchState> For<I, O> _for(int n, SearchStrategy<I, O> s) {
-        return new For<>(spec, n, s);
+        return new For<>(n, s);
     }
 
     public final <I extends SearchState, O extends SearchState> Repeat<I, O> repeat(SearchStrategy<I, O> s) {
-        return new Repeat<>(spec, s);
+        return new Repeat<>(s);
     }
 
     public final <I extends SearchState, O extends SearchState> Seq.Builder<I, O> seq(SearchStrategy<I, O> s) {
-        return new Seq.Builder<>(spec, s);
+        return new Seq.Builder<>(s);
+    }
+
+    public final <I extends SearchState, O extends SearchState> Shuffle<I, O> shuffle(SearchStrategy<I, O> s) {
+        return new Shuffle<>(s);
     }
 
     public final <I extends SearchState, O1 extends SearchState, O2 extends SearchState> ConcatAlt<I, O1, O2>
             concatAlt(SearchStrategy<I, O1> s1, SearchStrategy<I, O2> s2) {
-        return new ConcatAlt<>(spec, s1, s2);
+        return new ConcatAlt<>(s1, s2);
     }
 
 
@@ -61,31 +59,31 @@ public final class SearchStrategies {
     }
 
     public final <I extends SearchState, O extends SearchState> Concat<I, O> concat(Iterable<SearchStrategy<I, O>> ss) {
-        return new Concat<>(spec, ss);
+        return new Concat<>(ss);
     }
 
     public final <I1 extends SearchState, I2 extends SearchState, O extends SearchState>
             SearchStrategy<EitherSearchState<I1, I2>, O> match(SearchStrategy<I1, O> s1, SearchStrategy<I2, O> s2) {
         // this doesn't interleave!
-        return new Match<>(spec, s1, s2);
+        return new Match<>(s1, s2);
     }
 
     public final Infer infer() {
-        return new Infer(spec);
+        return new Infer();
     }
 
     public final Fix fix(SearchStrategy<SearchState, SearchState> search,
             SearchStrategy<SearchState, SearchState> infer, Predicate1<CUser> done, int maxConsecutiveFailures) {
-        return new Fix(spec, search, infer, c -> c instanceof CUser && done.test((CUser)c), maxConsecutiveFailures);
+        return new Fix(search, infer, c -> c instanceof CUser && done.test((CUser)c), maxConsecutiveFailures);
     }
     public final Fix fix2(SearchStrategy<SearchState, SearchState> search,
             SearchStrategy<SearchState, SearchState> infer, Predicate1<IConstraint> done, int maxConsecutiveFailures) {
-        return new Fix(spec, search, infer, done, maxConsecutiveFailures);
+        return new Fix(search, infer, done, maxConsecutiveFailures);
     }
 
     public final <C extends IConstraint> Select<C> select(Mode mode, Class<C> cls, Predicate1<C> include) {
         // full classes instead of lambda's to add forwarding toString
-        return new Select<>(spec, mode, cls, new Function1<SearchState, Function1<C, Double>>() {
+        return new Select<>(mode, cls, new Function1<SearchState, Function1<C, Double>>() {
 
             @Override public Function1<C, Double> apply(SearchState t) {
                 return new Function1<C, Double>() {
@@ -111,15 +109,15 @@ public final class SearchStrategies {
 
     public final <C extends IConstraint> Select<C> select(Mode mode, Class<C> cls,
             Function1<SearchState, Function1<C, Double>> weight) {
-        return new Select<>(spec, mode, cls, weight);
+        return new Select<>(mode, cls, weight);
     }
 
     public final FilterConstraints filter(Predicate1<IConstraint> p) {
-        return new FilterConstraints(spec, p);
+        return new FilterConstraints(p);
     }
 
     public final MapConstraints map(Function1<IConstraint, IConstraint> f) {
-        return new MapConstraints(spec, f);
+        return new MapConstraints(f);
     }
 
     public final Expand expand(Mode mode) {
@@ -152,40 +150,40 @@ public final class SearchStrategies {
     }
 
     public final Expand expand(Mode mode, Function2<Rule, Long, Double> ruleWeight) {
-        return new Expand(spec, mode, ruleWeight);
+        return new Expand(mode, ruleWeight, null);
     }
 
     public final Expand expand(Mode mode, Function2<Rule, Long, Double> ruleWeight, SetMultimap<String, Rule> rules) {
-        return new Expand(spec, mode, ruleWeight, rules);
+        return new Expand(mode, ruleWeight, rules);
     }
 
     public final Resolve resolve() {
-        return new Resolve(spec);
+        return new Resolve();
     }
 
     public final CanResolve canResolve() {
-        return new CanResolve(spec);
+        return new CanResolve();
     }
 
     public final DelayStuckQueries delayStuckQueries() {
-        return new DelayStuckQueries(spec);
+        return new DelayStuckQueries();
     }
 
     public final <I extends SearchState, O extends SearchState> Debug<I, O> debug(SearchStrategy<I, O> s,
             Action1<SearchNode<O>> debug) {
-        return new Debug<>(spec, debug, s);
+        return new Debug<>(debug, s);
     }
 
     public final <I extends SearchState> Identity<I> identity() {
-        return new Identity<>(spec);
+        return new Identity<>();
     }
 
     public final <I extends SearchState> Mark<I> marker(String marker) {
-        return new Mark<>(spec, marker);
+        return new Mark<>(marker);
     }
 
     public final <I extends SearchState, O extends SearchState> Require<I, O> require(SearchStrategy<I, O> s) {
-        return new Require<>(spec, s);
+        return new Require<>(s);
     }
 
     // util

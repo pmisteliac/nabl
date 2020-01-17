@@ -17,8 +17,7 @@ final class ConcatAlt<I extends SearchState, O1 extends SearchState, O2 extends 
     private final SearchStrategy<I, O2> s2;
     private final SearchStrategy<I, O1> s1;
 
-    ConcatAlt(Spec spec, SearchStrategy<I, O1> s1, SearchStrategy<I, O2> s2) {
-        super(spec);
+    ConcatAlt(SearchStrategy<I, O1> s1, SearchStrategy<I, O2> s2) {
         this.s2 = s2;
         this.s1 = s1;
     }
