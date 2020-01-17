@@ -2,7 +2,10 @@ package mb.statix.generator.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Spliterators;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.metaborg.util.functions.Function0;
@@ -90,6 +93,34 @@ public class StreamUtil {
 
     public static <T> Stream<T> generate(EnumeratedDistribution<T> distribution) {
         return Stream.generate(distribution::sample);
+    }
+
+    /**
+     * Returns a stream that returns a supplied default value when the stream is empty.
+     *
+     * @param stream the stream
+     * @param defaultValue the supplier for the default value
+     * @param <T> the type of value
+     * @return the new stream
+     */
+    public static <T> Stream<T> defaultIfEmpty(Stream<T> stream, Supplier<T> defaultValue) {
+        return orIfEmpty(stream, () -> Stream.of(defaultValue.get()));
+    }
+
+    /**
+     * Returns a stream that returns a supplied default stream when the original stream is empty.
+     *
+     * @param stream the stream
+     * @param onEmpty the supplier for the default stream
+     * @param <T> the type of value
+     * @return the new stream
+     */
+    public static <T> Stream<T> orIfEmpty(Stream<T> stream, Supplier<Stream<T>> onEmpty) {
+        Iterator<T> iterator = stream.iterator();
+        if (!iterator.hasNext()) {
+            return onEmpty.get();
+        }
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 
 }
