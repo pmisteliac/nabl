@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public final class Single<I extends SearchState, O extends SearchState> extends SearchStrategy<I, O> {
     private final SearchStrategy<I, O> s;
 
-    Single(int n, SearchStrategy<I, O> s) {
+    Single(SearchStrategy<I, O> s) {
         this.s = s;
     }
 

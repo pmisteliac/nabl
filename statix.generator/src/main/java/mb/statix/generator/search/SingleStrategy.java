@@ -22,6 +22,7 @@ public final class SingleStrategy implements SStrategy {
 
     @Override
     public StrategyNode apply(StrategyContext context, StrategyNode input) {
+        // single
         List<StrategySearchState> collected = input.getStates().limit(2).collect(Collectors.toList());
         if (collected.size() != 1) {
             return StrategyNode.fail();

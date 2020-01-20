@@ -1,18 +1,17 @@
 package mb.statix.generator.search;
 
-
-import io.usethesource.capsule.Set;
 import mb.statix.solver.IConstraint;
 
+import javax.annotation.Nullable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 
 /**
- * Selects some constraints to be the focus of the subsequent strategies.
+ * Selects a constraint to be the focus of the subsequent strategies.
  *
- * This strategy adds to any existing focused constraints. Use the unfocus strategy
- * to unfocus other constraints, or refocus to change focus.
+ * This strategy focuses on the first constraint for which the selector succeeds,
+ * or the strategy fails if there is none.
  */
 public final class FocusStrategy implements SStrategy {
 
@@ -29,14 +28,23 @@ public final class FocusStrategy implements SStrategy {
 
     @Override
     public StrategyNode apply(StrategyContext context, StrategyNode input) {
-        Stream<StrategySearchState> newStates = input.getStates().map(ss -> {
-            Set.Transient<IConstraint> focusConstraints = ss.constraints().asTransient();
-            focusConstraints.removeIf(c -> !this.selector.test(c));
-            focusConstraints.__insertAll(ss.getFocusedConstraints());
-            return new StrategySearchState(ss.state(), ss.constraints(), focusConstraints.freeze(), ss.delays(),
-                    ss.existentials(), ss.completeness());
+        Stream<StrategySearchState> newStates = input.getStates().flatMap(ss -> {
+            @Nullable IConstraint focusConstraint = findFocusOrNull(ss);
+            if (focusConstraint == null) return Stream.empty();
+
+            return Stream.of(new StrategySearchState(ss.state(), ss.constraints(), focusConstraint, ss.delays(),
+                    ss.existentials(), ss.completeness()));
         });
         return StrategyNode.of(newStates);
+    }
+
+    @Nullable private IConstraint findFocusOrNull(StrategySearchState ss) {
+        for (IConstraint c : ss.constraints()) {
+            if (selector.test(c)) {
+                return c;
+            }
+        }
+        return null;
     }
 
 }

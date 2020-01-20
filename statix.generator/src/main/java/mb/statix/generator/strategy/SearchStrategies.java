@@ -68,6 +68,10 @@ public final class SearchStrategies {
         return new Match<>(s1, s2);
     }
 
+    public final <I extends SearchState, O extends SearchState> Single<I, O> single(SearchStrategy<I, O> ss) {
+        return new Single<>(ss);
+    }
+
     public final Infer infer() {
         return new Infer();
     }

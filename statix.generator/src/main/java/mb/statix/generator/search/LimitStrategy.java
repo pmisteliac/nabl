@@ -27,6 +27,7 @@ public final class LimitStrategy implements SStrategy {
 
     @Override
     public StrategyNode apply(StrategyContext context, StrategyNode input) {
+        // limit(n)
         return StrategyNode.of(input.getStates().limit(this.limit));
     }
 

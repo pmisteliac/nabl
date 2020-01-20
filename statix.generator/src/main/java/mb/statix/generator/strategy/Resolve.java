@@ -108,7 +108,9 @@ final class Resolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, Se
 
         final List<Integer> indices =
                 IntStream.range(0, count.get()).boxed().collect(Collectors.toCollection(ArrayList::new));
+        // Is suffle needed here? Should be a separate strategy shuffle()
         Collections.shuffle(indices, ctx.rnd());
+        // Actually, due to shuffling we might not get all the resolutions, when select.getAndDecrement() == 0?
 
         final String desc = this.toString() + "[" + count.get() + "]";
         return SearchNodes.of(node, () -> desc, flatMap(indices.stream(), idx -> {

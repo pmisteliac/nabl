@@ -10,39 +10,42 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
 
+import javax.annotation.Nullable;
+
 
 /**
  * A search strategy state.
  */
 public final class StrategySearchState extends SearchState {
 
-    private final Set.Immutable<IConstraint> focusedConstraints;
+    @Nullable private final IConstraint focusedConstraint;
     private final Set.Immutable<IConstraint> unfocusedConstraints;
 
     protected StrategySearchState(
             IState.Immutable state,
             Set.Immutable<IConstraint> constraints,
-            Set.Immutable<IConstraint> focusedConstraints,
+            @Nullable IConstraint focusedConstraint,
             Map.Immutable<IConstraint, Delay> delays,
             ImmutableMap<ITermVar, ITermVar> existentials,
             ICompleteness.Immutable completeness
     ) {
         super(state, constraints, delays, existentials, completeness);
 
-        if (!constraints.containsAll(focusedConstraints)) {
-            throw new IllegalArgumentException("The focused constraints must be a subset of the constraints in the state.");
+        if (!constraints.contains(focusedConstraint)) {
+            throw new IllegalArgumentException("The focused constraint must be a subset of the constraints in the state.");
         }
-        this.focusedConstraints = focusedConstraints;
-        this.unfocusedConstraints = constraints.__removeAll(focusedConstraints);
+        this.focusedConstraint = focusedConstraint;
+        this.unfocusedConstraints = constraints.__remove(focusedConstraint);
     }
 
     /**
-     * Gets the focused constraints.
+     * Gets the focused constraint.
      *
-     * @return the set of focused constraints
+     * @return the focused constraint; or {@code null} when none is focused
      */
-    public Set.Immutable<IConstraint> getFocusedConstraints() {
-        return this.focusedConstraints;
+    @Nullable
+    public IConstraint getFocusedConstraint() {
+        return this.focusedConstraint;
     }
 
     /**
