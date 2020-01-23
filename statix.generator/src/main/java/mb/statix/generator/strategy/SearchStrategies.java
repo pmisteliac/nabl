@@ -22,6 +22,8 @@ import mb.statix.generator.nodes.SearchNode;
 import mb.statix.solver.IConstraint;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
+import org.metaborg.util.log.ILogger;
+
 
 public final class SearchStrategies {
 
@@ -83,6 +85,10 @@ public final class SearchStrategies {
     public final Fix fix2(SearchStrategy<SearchState, SearchState> search,
             SearchStrategy<SearchState, SearchState> infer, Predicate1<IConstraint> done, int maxConsecutiveFailures) {
         return new Fix(search, infer, done, maxConsecutiveFailures);
+    }
+
+    public final <I extends SearchState> Try<I> try_(SearchStrategy<I, I> search) {
+        return new Try<>(search);
     }
 
     public final <C extends IConstraint> Select<C> select(Mode mode, Class<C> cls, Predicate1<C> include) {
@@ -176,6 +182,10 @@ public final class SearchStrategies {
     public final <I extends SearchState, O extends SearchState> Debug<I, O> debug(SearchStrategy<I, O> s,
             Action1<SearchNode<O>> debug) {
         return new Debug<>(debug, s);
+    }
+
+    public final <I extends SearchState, O extends SearchState> Debug<I, O> debugStates(SearchStrategy<I, O> s, ILogger log, String prefix) {
+        return debug(s, n -> log.info(prefix + ": " + n.output().toString()));
     }
 
     public final <I extends SearchState> Identity<I> identity() {

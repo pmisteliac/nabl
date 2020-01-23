@@ -13,16 +13,16 @@ import java.util.stream.Stream;
 /**
  * Attempts to apply a strategy. If the strategy fails, the original node is returned.
  */
-public final class Try extends SearchStrategy<SearchState, SearchState> {
+public final class Try<I extends SearchState> extends SearchStrategy<I, I> {
 
-    private final SearchStrategy<SearchState, SearchState> s;
+    private final SearchStrategy<I, I> s;
 
-    public Try(SearchStrategy<SearchState, SearchState> s) {
+    public Try(SearchStrategy<I, I> s) {
         this.s = s;
     }
 
-    @Override protected SearchNodes<SearchState> doApply(SearchContext ctx, SearchNode<SearchState> node) {
-        Stream<SearchNode<SearchState>> def = StreamUtil.orIfEmpty(s.apply(ctx, node).nodes(), () -> Stream.of(node));
+    @Override protected SearchNodes<I> doApply(SearchContext ctx, SearchNode<I> node) {
+        Stream<SearchNode<I>> def = StreamUtil.orIfEmpty(s.apply(ctx, node).nodes(), () -> Stream.of(node));
         return SearchNodes.of(node.parent(), () -> "try(" + node.desc() + ")", def);
     }
 

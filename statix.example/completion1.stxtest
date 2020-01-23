@@ -2,12 +2,24 @@ resolve {s e T e1 e2}
 
 	new s, typeOf(s, Let([
 		Bind("b", BOOL(), True()),
-		e,
 		Bind("f", FUN([BOOL(), INT()], BOOL()), Fun([
 			Param("a", BOOL()),
 			Param("b", INT())
 		], Var("a")))
-	], Plus(Var("i"), Zero()))) == T
+	], e)) == BOOL()
+
+//	new s, typeOf(s, Let([
+//		Bind("b", BOOL(), True())
+//	], e)) == T
+	
+//	new s, typeOf(s, Let([
+//		Bind("b", BOOL(), True()),
+//		e,
+//		Bind("f", FUN([BOOL(), INT()], BOOL()), Fun([
+//			Param("a", BOOL()),
+//			Param("b", INT())
+//		], Var("a")))
+//	], Plus(Var("i"), Zero()))) == T
 
 signature
 

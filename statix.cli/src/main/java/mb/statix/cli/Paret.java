@@ -71,42 +71,64 @@ public class Paret {
         return S.seq(S.infer()).$(S.delayStuckQueries()).$(S.dropAst()).$();
     }
     
-    public SearchStrategy<SearchState, SearchState> complete(TermVar v) {
-        Predicate1<CUser> cuserContainsCompletionVarDirectly = c -> c.args().stream().anyMatch(t -> t.getVars().contains(v));
-        Predicate1<CResolveQuery> cresolveQueryContainsCompletionVarTransitively = new Any<>(); // FIXME
-        Predicate1<CUser> cuserContainsCompletionVarTransitively = c -> c.args().stream().anyMatch(t -> t.getVars().contains(v));    // FIXME
-        // @formatter:off
+    public SearchStrategy<SearchState, SearchState> complete() {//TermVar v) {
         return S.seq(S.infer())
-                  // Ensure all user constraints which (directly) contain the variable to be completed, are expanded
-                  .$(S.fix2(
-                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarDirectly)))
-                        .$(S.expand(Mode.ENUM))
-                        .$(),
-                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
-                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarDirectly.test((CUser)c)),
-                     10)
-                  )
-                  // Ensure all queries which (transitively) contain the variable to be completed, are 'resolved'
-                  .$(S.fix2(
-                	 S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, cresolveQueryContainsCompletionVarTransitively)))
-                        .$(S.resolve())
-                        .$(),
-                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
-                     c -> !(c instanceof CResolveQuery) || (cresolveQueryContainsCompletionVarTransitively.test((CResolveQuery)c)),
-                     10)
-                  )
-                  // Ensure all user constraints which (transitively) contain the variable to be completed, are deterministically expanded
-                  .$(S.fix2(
-                          // single()
-                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarTransitively)))
-                        .$(S.expand(Mode.ENUM))
-                        .$(),
-                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
-                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarTransitively.test((CUser)c)),
-                     10)
-                  )
-                  .$();
-        // @formatter:on
+                .$(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))
+                .$(S.expand(Mode.ENUM))
+                .$(S.infer())
+                .$(S.debug(S.identity(), n -> log.info("Resolve Queries")))
+                .$(S.debugStates(S.fix2(
+                        S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, new Any<>())))
+                                .$(S.resolve())
+                                .$(),
+                        S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+                        c -> !(c instanceof CResolveQuery),
+                        10)
+                ,log, "RQ"))
+//                .$(S.debug(S.identity(), n -> log.info("Expand Deterministic")))
+//                .$(S.debugStates(S.try_(S.single(
+//                        S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))
+//                        .$(S.expand(Mode.ENUM))
+//                        .$(S.infer())
+//                        .$()))
+//                , log, "ED"))
+                .$();
+//
+//        Predicate1<CUser> cuserContainsCompletionVarDirectly = new Any<>(); // FIXMEc -> c.args().stream().anyMatch(t -> t.getVars().contains(v));
+//        Predicate1<CResolveQuery> cresolveQueryContainsCompletionVarTransitively = new Any<>(); // FIXME
+//        Predicate1<CUser> cuserContainsCompletionVarTransitively = new Any<>(); // FIXME c -> c.args().stream().anyMatch(t -> t.getVars().contains(v));    // FIXME
+//        // @formatter:off
+//        return S.seq(S.infer())
+//                  // Ensure all user constraints which (directly) contain the variable to be completed, are expanded
+//                  .$(S.fix2(
+//                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarDirectly)))
+//                        .$(S.expand(Mode.ENUM))
+//                        .$(),
+//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarDirectly.test((CUser)c)),
+//                     10)
+//                  )
+//                  // Ensure all queries which (transitively) contain the variable to be completed, are 'resolved'
+//                  .$(S.fix2(
+//                	 S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, cresolveQueryContainsCompletionVarTransitively)))
+//                        .$(S.resolve())
+//                        .$(),
+//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     c -> !(c instanceof CResolveQuery) || (cresolveQueryContainsCompletionVarTransitively.test((CResolveQuery)c)),
+//                     10)
+//                  )
+//                  // Ensure all user constraints which (transitively) contain the variable to be completed, are deterministically expanded
+//                  .$(S.fix2(
+//                          // single()
+//                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarTransitively)))
+//                        .$(S.expand(Mode.ENUM))
+//                        .$(),
+//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarTransitively.test((CUser)c)),
+//                     10)
+//                  )
+//                  .$();
+//        // @formatter:on
     }
 
     // generation of expressions
