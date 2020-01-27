@@ -2,6 +2,7 @@ package mb.statix.generator.search;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -28,6 +29,19 @@ public final class SeqStrategy implements SStrategy {
             result = s.apply(context, result);
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        if (inParens)
+            return strategies.stream().map(s -> s.toString(false)).collect(Collectors.joining(" ; "));
+        else
+            return "(" + strategies.stream().map(s -> s.toString(false)).collect(Collectors.joining(" ; ")) + ")";
     }
 
 }

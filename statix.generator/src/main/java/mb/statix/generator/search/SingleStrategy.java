@@ -30,4 +30,14 @@ public final class SingleStrategy implements SStrategy {
         return StrategyNode.of(Stream.of(collected.get(0)));
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "single";
+    }
+
 }

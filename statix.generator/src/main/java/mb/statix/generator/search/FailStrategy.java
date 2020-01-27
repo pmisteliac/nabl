@@ -17,4 +17,13 @@ public final class FailStrategy implements SStrategy {
         return StrategyNode.fail();
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "fail";
+    }
 }

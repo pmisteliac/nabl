@@ -28,4 +28,14 @@ public final class UnfocusStrategy implements SStrategy {
         return StrategyNode.of(newStates);
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "unfocus";
+    }
+
 }

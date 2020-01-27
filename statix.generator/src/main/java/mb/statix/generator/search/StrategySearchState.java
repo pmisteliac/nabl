@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.generator.FocusedSearchState;
 import mb.statix.generator.SearchState;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
@@ -31,11 +32,15 @@ public final class StrategySearchState extends SearchState {
     ) {
         super(state, constraints, delays, existentials, completeness);
 
-        if (!constraints.contains(focusedConstraint)) {
+        if (focusedConstraint != null && !constraints.contains(focusedConstraint)) {
             throw new IllegalArgumentException("The focused constraint must be a subset of the constraints in the state.");
         }
         this.focusedConstraint = focusedConstraint;
-        this.unfocusedConstraints = constraints.__remove(focusedConstraint);
+        if (focusedConstraint != null) {
+        	this.unfocusedConstraints = constraints.__remove(focusedConstraint);
+        } else {
+        	this.unfocusedConstraints = constraints;
+        }
     }
 
     /**
@@ -55,6 +60,15 @@ public final class StrategySearchState extends SearchState {
      */
     public Set.Immutable<IConstraint> getUnfocusedConstraints() {
         return this.unfocusedConstraints;
+    }
+
+    public static StrategySearchState of(SearchState st) {
+        if (st instanceof StrategySearchState) return (StrategySearchState)st;
+        IConstraint focus = null;
+        if (st instanceof FocusedSearchState) {
+            focus = ((FocusedSearchState)st).focus();
+        }
+        return new StrategySearchState(st.state(), st.constraints(), focus, st.delays(), st.existentials(), st.completeness());
     }
 
 }

@@ -133,7 +133,7 @@ final class Resolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, Se
             final List<Integer> sizes = sizes(resultSize, ctx.rnd());
 
             return flatMap(sizes.stream().map(size -> size - reqMatches.size()), size -> {
-                return Subsets.of(optMatches).enumerate(size, ctx.rnd()).map(entry -> {
+                return Subsets.of(optMatches).enumerate(size).map(entry -> {
                     final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
                     reqMatches.forEach(subEnvBuilder::match);
                     entry.getKey().forEach(subEnvBuilder::match);
@@ -161,12 +161,11 @@ final class Resolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, Se
 
     private List<Integer> sizes(Range<Integer> resultSize, Random rnd) {
         final IntStream fixedSizes = IntStream.of(0, 1, resultSize.upperEndpoint());
-        final IntStream randomSizes = RandomUtil.ints(2, resultSize.upperEndpoint(), rnd).limit(sizes);
-        final IntStream allSizes =
-                Streams.concat(fixedSizes, randomSizes).filter(size -> resultSize.contains(size)).limit(subsetsPerSize);
+//        final IntStream randomSizes = RandomUtil.ints(2, resultSize.upperEndpoint(), rnd).limit(sizes);
+        final IntStream allSizes = fixedSizes.filter(resultSize::contains).limit(subsetsPerSize);
         // make sure there are no duplicates, of resultSize.upperEndpoint equals one of the fixed values
         final List<Integer> subsetSizes = Lists.newArrayList(allSizes.boxed().collect(Collectors.toSet()));
-        Collections.shuffle(subsetSizes, rnd);
+//        Collections.shuffle(subsetSizes, rnd);
         return subsetSizes;
     }
 

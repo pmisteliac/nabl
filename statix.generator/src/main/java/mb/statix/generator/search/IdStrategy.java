@@ -17,4 +17,14 @@ public final class IdStrategy implements SStrategy {
         return input;
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "id";
+    }
+
 }

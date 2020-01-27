@@ -28,4 +28,15 @@ public final class WhereStrategy implements SStrategy {
         }
     }
 
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "where(" + strategy.toString(true) + ")";
+    }
+
 }

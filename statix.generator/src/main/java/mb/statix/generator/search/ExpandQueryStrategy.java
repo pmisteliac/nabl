@@ -34,6 +34,7 @@ import mb.statix.solver.query.RegExpLabelWF;
 import mb.statix.solver.query.RelationLabelOrder;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
+import org.metaborg.util.functions.Function2;
 import org.metaborg.util.functions.Predicate0;
 import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.iterators.Iterables2;
@@ -58,10 +59,17 @@ import static mb.statix.generator.util.StreamUtil.flatMap;
  */
 public final class ExpandQueryStrategy implements SStrategy {
 
+    private final Function2<Integer, Integer, Boolean> selector;
+
     /**
      * Initializes a new instance of the {@link ExpandQueryStrategy} class.
+     *
+     * @param selector function (size, max) that given the size of the set and the max set size,
+     *                 returns whether to include the set or not
      */
-    public ExpandQueryStrategy() { }
+    public ExpandQueryStrategy(Function2<Integer, Integer, Boolean> selector) {
+        this.selector = selector;
+    }
 
     @Override
     public StrategyNode apply(StrategyContext context, StrategyNode input) {
@@ -92,46 +100,69 @@ public final class ExpandQueryStrategy implements SStrategy {
             final AtomicInteger count = new AtomicInteger(1);
             resolve(scope, nameResolution, () -> { count.incrementAndGet(); return false; });
 
+            // We get a number of possible declarations the query could resolve to.
+            // If we know that the ResultTerm is a singleton, then we know the query should resolve to a single declaration.
+            // But if we don't know that the ResultTerm is a singleton, e.g., when it is a variable or wildcard,
+            // then we also don't know how many declarations the query should resolve to (it might be limited by another
+            // constraint to be a singleton set, but maybe not, and at this point we don't know).
+            // Therefore, we make multiple possible resolutions: empty set (no declarations found), all the singleton
+            // sets (resolve to one declaration), the set of all declarations, and random sets of combinations of declarations.
+            // However, in this case we don't do random.
+            // Example:
+            //     let ɑ = ⋯
+            //         β = ⋯
+            //      in ɣ
+            // Now a query in ɣ can resolve to {}, {ɑ}, {β}, {ɑ, β} unless we know it must be a singleton.
+            // Essentially, when we're not doing random term generation we should return the powerset.
+            // Next question is: how do we reduce the powerset in a meaningful way, such as selecting the empty
+            // set, singleton sets, set of all, and some random ones in between? We could add a selection strategy.
+
             int resolutionCount = count.get();
-//            for (int i = 0; i < resolutionCount; i++) {
-//                final AtomicInteger select = new AtomicInteger(resolutionCount);
-//                final Env<Scope, ITerm, ITerm, CEqual> env = resolve(scope, nameResolution, () -> select.getAndDecrement() == 0);
-//
-//                final List<Match<Scope, ITerm, ITerm, CEqual>> reqMatches =
-//                        env.matches.stream().filter(m -> !m.condition.isPresent()).collect(Collectors.toList());
-//                final List<Match<Scope, ITerm, ITerm, CEqual>> optMatches =
-//                        env.matches.stream().filter(m -> m.condition.isPresent()).collect(Collectors.toList());
-//
-//                final Range<Integer> resultSize = resultSize(focus.resultTerm(), unifier, env.matches.size());
-//                final List<Integer> sizes = sizes(resultSize, ctx.rnd());
-//
-//                return flatMap(sizes.stream().map(size -> size - reqMatches.size()), size -> {
-//                    return Subsets.of(optMatches).enumerate(size, ctx.rnd()).map(entry -> {
-//                        final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
-//                        reqMatches.forEach(subEnvBuilder::match);
-//                        entry.getKey().forEach(subEnvBuilder::match);
-//                        entry.getValue().forEach(subEnvBuilder::reject);
-//                        env.rejects.forEach(subEnvBuilder::reject);
-//                        final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
-//                        final List<ITerm> pathTerms = subEnv.matches.stream().map(m -> StatixTerms.explicate(m.path))
-//                                .collect(ImmutableList.toImmutableList());
-//                        final ImmutableList.Builder<IConstraint> constraints = ImmutableList.builder();
-//                        constraints.add(new CEqual(B.newList(pathTerms), focus.resultTerm(), focus));
-//                        flatMap(subEnv.matches.stream(), m -> Optionals.stream(m.condition)).forEach(condition -> {
-//                            constraints.add(condition);
-//                        });
-//                        flatMap(subEnv.rejects.stream(), m -> Optionals.stream(m.condition)).forEach(condition -> {
-//                            constraints.add(new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
-//                                    condition.cause().orElse(null), condition.message().orElse(null)));
-//                        });
-//                        return update(ss, constraints.build(), Iterables2.singleton(focus));
-//                    });
-//                });
-//            }
+            for (int i = 0; i < resolutionCount; i++) {
+                final AtomicInteger select = new AtomicInteger(resolutionCount);
+                final Env<Scope, ITerm, ITerm, CEqual> env = resolve(scope, nameResolution, () -> select.getAndDecrement() == 0);
+
+                final List<Match<Scope, ITerm, ITerm, CEqual>> reqMatches =
+                        env.matches.stream().filter(m -> !m.condition.isPresent()).collect(Collectors.toList());
+                final List<Match<Scope, ITerm, ITerm, CEqual>> optMatches =
+                        env.matches.stream().filter(m -> m.condition.isPresent()).collect(Collectors.toList());
+
+                final Range<Integer> resultSize = resultSize(focus.resultTerm(), unifier, env.matches.size());
+                final List<Integer> sizes = sizes(resultSize);
+
+                return flatMap(sizes.stream().map(size -> size - reqMatches.size()), size -> {
+                    return Subsets.of(optMatches).enumerate(size).map(entry -> {
+                        final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
+                        reqMatches.forEach(subEnvBuilder::match);
+                        entry.getKey().forEach(subEnvBuilder::match);
+                        entry.getValue().forEach(subEnvBuilder::reject);
+                        env.rejects.forEach(subEnvBuilder::reject);
+                        final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
+                        final List<ITerm> pathTerms = subEnv.matches.stream().map(m -> StatixTerms.explicate(m.path))
+                                .collect(ImmutableList.toImmutableList());
+                        final ImmutableList.Builder<IConstraint> constraints = ImmutableList.builder();
+                        constraints.add(new CEqual(B.newList(pathTerms), focus.resultTerm(), focus));
+                        flatMap(subEnv.matches.stream(), m -> Optionals.stream(m.condition)).forEach(condition -> {
+                            constraints.add(condition);
+                        });
+                        flatMap(subEnv.rejects.stream(), m -> Optionals.stream(m.condition)).forEach(condition -> {
+                            constraints.add(new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
+                                    condition.cause().orElse(null), condition.message().orElse(null)));
+                        });
+                        return update(ss, constraints.build(), Iterables2.singleton(focus));
+                    });
+                });
+            }
             return null;
 
         });
         return StrategyNode.of(newStates);
+    }
+
+    private List<Integer> sizes(Range<Integer> resultSize) {
+        final IntStream fixedSizes = IntStream.of(0, 1, resultSize.upperEndpoint());
+        final IntStream allSizes = fixedSizes.filter(resultSize::contains).limit(3);
+        return Lists.newArrayList(allSizes.boxed().collect(Collectors.toSet()));
     }
 
     /**
@@ -225,6 +256,16 @@ public final class ExpandQueryStrategy implements SStrategy {
                 }
         )).match(result, unifier).orElse(Range.closed(0, max));
         // @formatter:on
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "expandQuery";
     }
 
 }

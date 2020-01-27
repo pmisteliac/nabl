@@ -23,4 +23,14 @@ public final class TryStrategy implements SStrategy {
         return new LChoiceStrategy(this.strategy, new IdStrategy()).apply(context, input);
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "try(" + strategy.toString(true) + ")";
+    }
+
 }

@@ -26,4 +26,16 @@ public final class LChoiceStrategy implements SStrategy {
         return new GChoiceStrategy(this.strategy1, new IdStrategy(), this.strategy2).apply(context, input);
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        if (inParens)
+            return strategy1.toString(false) + " <+ " + strategy2.toString(false);
+        else
+            return "(" + strategy1.toString(false) + " <+ " + strategy2.toString(false) + ")";
+    }
 }

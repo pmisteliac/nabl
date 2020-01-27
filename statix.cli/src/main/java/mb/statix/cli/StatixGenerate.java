@@ -3,8 +3,12 @@ package mb.statix.cli;
 import static mb.nabl2.terms.build.TermBuild.B;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import mb.statix.generator.search.SStrategy;
+import mb.statix.generator.search.StrategyNode;
+import mb.statix.generator.search.StrategySearchState;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
@@ -76,9 +80,21 @@ public class StatixGenerate {
                 log.info("constraints {}", constraints);
             }
 
+            @Override public void init(long seed, SStrategy strategy, Iterable<IConstraint> constraints) {
+                log.info("seed {}", seed);
+                log.info("strategy {}", strategy);
+                log.info("constraints {}", constraints);
+            }
+
             @Override public void success(SearchNode<SearchState> n) {
                 progress.step('+');
                 addSize(n, hitStats);
+                logSuccess(log, Level.Debug, n, pretty::apply);
+            }
+
+            @Override
+            public void success(StrategyNode n) {
+                progress.step('+');
                 logSuccess(log, Level.Debug, n, pretty::apply);
             }
 
@@ -86,6 +102,12 @@ public class StatixGenerate {
                 progress.step('.');
                 addSize(nodes.parent(), missStats);
                 logFailure(log, Level.Debug, nodes, pretty::apply);
+            }
+
+            @Override
+            public void failure(StrategyNode n) {
+                progress.step('.');
+                logFailure(log, Level.Debug, n, pretty::apply);
             }
 
             private void addSize(SearchNode<?> node, DescriptiveStatistics stats) {
@@ -141,7 +163,30 @@ public class StatixGenerate {
         log.log(lvl, "===============");
     }
 
+    private static void logSuccess(ILogger log, Level lvl, StrategyNode node,
+                                   Function1<SearchState, String> pp) {
+        if(!DEBUG) {
+            return;
+        }
+        log.log(lvl, "=== SUCCESS ===");
+        for (StrategySearchState ss : node.getStates().collect(Collectors.toList())) {
+            log.log(lvl, " * {}", pp.apply(ss));
+        }
+        log.log(lvl, "---- Trace ----");
+        logTrace(log, lvl, node, 1, pp);
+        log.log(lvl, "===============");
+    }
+
     private static void logFailure(ILogger log, Level lvl, SearchElement node, Function1<SearchState, String> pp) {
+        if(!DEBUG) {
+            return;
+        }
+        log.log(lvl, "=== FAILURE ===");
+        logTrace(log, lvl, node, Integer.MAX_VALUE, pp);
+        log.log(lvl, "===============");
+    }
+
+    private static void logFailure(ILogger log, Level lvl, StrategyNode node, Function1<SearchState, String> pp) {
         if(!DEBUG) {
             return;
         }
@@ -152,22 +197,30 @@ public class StatixGenerate {
 
     @SuppressWarnings("unused") private static void logTrace(ILogger log, Level lvl, SearchElement node, int maxDepth,
             Function1<SearchState, String> pp) {
-        if(node instanceof SearchNodes) {
-            SearchNodes<?> nodes = (SearchNodes<?>) node;
+        if (node instanceof SearchNodes) {
+            SearchNodes<?> nodes = (SearchNodes<?>)node;
             log.log(lvl, " * {}", nodes.desc());
             logTrace(log, lvl, nodes.parent(), maxDepth, pp);
         } else {
-            SearchNode<?> traceNode = (SearchNode<?>) node;
+            SearchNode<?> traceNode = (SearchNode<?>)node;
             int depth = 0;
             do {
                 log.log(lvl, " * [{}] {}", traceNode.id(), traceNode.desc());
-                if((depth++ == 0 || (TRACE && depth <= maxDepth)) && traceNode.output() instanceof SearchState) {
-                    SearchState state = (SearchState) ((SearchNode<?>) traceNode).output();
+                if ((depth++ == 0 || (TRACE && depth <= maxDepth)) && traceNode.output() instanceof SearchState) {
+                    SearchState state = (SearchState)((SearchNode<?>)traceNode).output();
                     state.print(ln -> log.log(lvl, "   {}", ln), (t, u) -> u.toString(t));
                 }
-            } while((traceNode = traceNode.parent()) != null);
+            } while ((traceNode = traceNode.parent()) != null);
             log.log(lvl, " # depth {}", depth);
         }
+    }
+
+    private static void logTrace(ILogger log, Level lvl, StrategyNode node, int maxDepth,
+    Function1<SearchState, String> pp) {
+        log.log(lvl, " * {}", node);
+        node.getStates().forEach(ss -> {
+            ss.print(ln -> log.log(lvl, "   {}", ln), (t, u) -> u.toString(t));
+        });
     }
 
     private static ITerm project(String varName, SearchState s) {

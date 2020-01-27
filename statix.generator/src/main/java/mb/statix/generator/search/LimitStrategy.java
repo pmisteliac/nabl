@@ -31,4 +31,15 @@ public final class LimitStrategy implements SStrategy {
         return StrategyNode.of(input.getStates().limit(this.limit));
     }
 
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "limit(" + limit + ")";
+    }
+
 }

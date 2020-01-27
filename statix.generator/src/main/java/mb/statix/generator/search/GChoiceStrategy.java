@@ -33,4 +33,16 @@ public final class GChoiceStrategy implements SStrategy {
         }
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        if (inParens)
+            return strategy1 + " < " + strategy2 + " + " + strategy3;
+        else
+            return "(" + strategy1 + " < " + strategy2 + " + " + strategy3 + ")";
+    }
 }

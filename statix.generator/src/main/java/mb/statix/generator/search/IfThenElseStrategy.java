@@ -29,4 +29,17 @@ public final class IfThenElseStrategy implements SStrategy {
         return new GChoiceStrategy(new WhereStrategy(this.strategyC), this.strategyT, this.strategyE).apply(context, input);
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        if (inParens)
+            return "if " + strategyC.toString(false) + " then " + strategyT.toString(false) + " else " + strategyE.toString(false);
+        else
+            return "(if " + strategyC.toString(false) + " then " + strategyT.toString(false) + " else " + strategyE.toString(false) + ")";
+    }
+
 }

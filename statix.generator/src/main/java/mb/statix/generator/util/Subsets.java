@@ -27,23 +27,23 @@ public class Subsets<E> {
         this.elementSet = CapsuleUtil.toSet(elements);
     }
 
-    public Stream<Map.Entry<Set.Immutable<E>, Set.Immutable<E>>> enumerate(int size, Random rnd) {
+    public Stream<Map.Entry<Set.Immutable<E>, Set.Immutable<E>>> enumerate(int size) {//}, Random rnd) {
         if(size < 0 || size > elementList.size()) {
             return Stream.empty();
         }
-        return enumerate(size, 0, elementList.size() - size, rnd)
+        return enumerate(size, 0, elementList.size() - size)
                 .map(subset -> ImmutableTuple2.of(subset, elementSet.__removeAll(subset)));
     }
 
-    private Stream<Set.Immutable<E>> enumerate(int n, int start, int end, Random rnd) {
+    private Stream<Set.Immutable<E>> enumerate(int n, int start, int end){//}, Random rnd) {
         if(n == 0) {
             return Stream.of(Set.Immutable.of());
         }
         final List<Integer> indices =
                 IntStream.range(start, end + 1).boxed().collect(Collectors.toCollection(ArrayList::new));
-        Collections.shuffle(indices, rnd);
+//        Collections.shuffle(indices, rnd);
         return flatMap(indices.stream(), index -> {
-            return enumerate(n - 1, index, end + 1, rnd).map(subset -> subset.__insert(elementList.get(index)));
+            return enumerate(n - 1, index, end + 1).map(subset -> subset.__insert(elementList.get(index)));
         });
     }
 

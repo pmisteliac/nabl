@@ -2,6 +2,7 @@ package mb.statix.cli;
 
 import static mb.statix.constraints.Constraints.collectBase;
 import static mb.statix.generator.util.StreamUtil.flatMap;
+//import static mb.statix.generator.search.Strategies.*;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mb.nabl2.terms.build.TermVar;
+import mb.statix.generator.search.SStrategy;
 import org.metaborg.util.functions.Function1;
 import org.metaborg.util.functions.Predicate1;
 import org.metaborg.util.log.ILogger;
@@ -31,7 +33,7 @@ import mb.statix.generator.SearchStrategy.Mode;
 import mb.statix.generator.predicate.Any;
 import mb.statix.generator.predicate.Match;
 import mb.statix.generator.predicate.Not;
-import mb.statix.generator.strategy.SearchStrategies;
+import static mb.statix.generator.strategy.SearchStrategies2.*;
 import mb.statix.generator.util.StreamUtil;
 import mb.statix.scopegraph.reference.CriticalEdge;
 import mb.statix.solver.IConstraint;
@@ -48,19 +50,19 @@ public class Paret {
     private static final String IS_RE = ".*!is_.*";
 
     private final Spec spec;
-    private final SearchStrategies S;
+//    private final SearchStrategies S;
 
     public Paret(Spec spec) {
         this.spec = spec;
-        this.S = new SearchStrategies();
+//        this.S = new SearchStrategies();
     }
 
     public SearchStrategy<SearchState, SearchState> search() {
         // @formatter:off
-        return S.seq(searchExp())
-                  .$(S.marker("generateLex"))
+        return seq(searchExp())
+                  .$(marker("generateLex"))
                   .$(generateLex())
-                  .$(S.marker("done"))
+                  .$(marker("done"))
                   .$();
         // @formatter:on
     }
@@ -68,28 +70,58 @@ public class Paret {
     // inference step
 
     private SearchStrategy<SearchState, SearchState> inferDelayAndDrop() {
-        return S.seq(S.infer()).$(S.delayStuckQueries()).$(S.dropAst()).$();
+        return seq(infer()).$(delayStuckQueries()).$(dropAst()).$();
+    }
+
+    public SStrategy complete2() {
+//        return seq(
+//        	debug("start ->"),
+//            infer(),
+//            debug("-> infer1 ->"),
+//            delayStuckQueries(),
+//            debug("-> delayStuckQueries1 ->"),
+//            focus(c -> c instanceof CUser),
+//            debug("-> focus ->"),
+//            limit(1),
+//            debug("-> limit(1) ->"),
+//            expandRule(),
+//            debug("-> expandRule ->"),
+//            infer(),
+//            debug("-> infer2 ->"),
+//            delayStuckQueries(),
+//            debug("-> delayStuckQueries2 ->")
+////            repeat(seq(
+////                focus(c -> c instanceof CResolveQuery),
+////                expandQuery(),
+////                infer(),
+////                delayStuckQueries()
+////            ))
+//        );
+        return null;
     }
     
     public SearchStrategy<SearchState, SearchState> complete() {//TermVar v) {
-        return S.seq(S.infer())
-                .$(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))
-                .$(S.expand(Mode.ENUM))
-                .$(S.infer())
-                .$(S.debug(S.identity(), n -> log.info("Resolve Queries")))
-                .$(S.debugStates(S.fix2(
-                        S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, new Any<>())))
-                                .$(S.resolve())
+        return seq(infer())
+                .$(debugStates(
+                        seq(limit(1, select(Mode.ENUM, CUser.class, new Any<>())))
+                        .$(expand(Mode.ENUM))
+                                .$()
+                        , log, "EX"))
+                .$(debugStates(infer(), log, "EX-INF"))
+                .$(debug(identity(), n -> log.info("Resolve Queries")))
+                .$(debugStates(fix2(
+                        seq(limit(1, select(Mode.ENUM, CResolveQuery.class, new Any<>())))
+                                .$(resolve())
                                 .$(),
-                        S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+                        seq(infer()).$(delayStuckQueries()).$(),
                         c -> !(c instanceof CResolveQuery),
                         10)
                 ,log, "RQ"))
-//                .$(S.debug(S.identity(), n -> log.info("Expand Deterministic")))
-//                .$(S.debugStates(S.try_(S.single(
-//                        S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, new Any<>())))
-//                        .$(S.expand(Mode.ENUM))
-//                        .$(S.infer())
+//                .$(debug(identity(), n -> log.info("Expand Deterministic")))
+//                .$(debugStates(try_(single(
+//                        seq(limit(1, select(Mode.ENUM, CUser.class, new Any<>())))
+//                        .$(expand(Mode.ENUM))
+//                        .$(infer())
 //                        .$()))
 //                , log, "ED"))
                 .$();
@@ -98,32 +130,32 @@ public class Paret {
 //        Predicate1<CResolveQuery> cresolveQueryContainsCompletionVarTransitively = new Any<>(); // FIXME
 //        Predicate1<CUser> cuserContainsCompletionVarTransitively = new Any<>(); // FIXME c -> c.args().stream().anyMatch(t -> t.getVars().contains(v));    // FIXME
 //        // @formatter:off
-//        return S.seq(S.infer())
+//        return seq(infer())
 //                  // Ensure all user constraints which (directly) contain the variable to be completed, are expanded
-//                  .$(S.fix2(
-//                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarDirectly)))
-//                        .$(S.expand(Mode.ENUM))
+//                  .$(fix2(
+//                     seq(limit(1, select(Mode.ENUM, CUser.class, cuserContainsCompletionVarDirectly)))
+//                        .$(expand(Mode.ENUM))
 //                        .$(),
-//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     seq(infer()).$(delayStuckQueries()).$(),
 //                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarDirectly.test((CUser)c)),
 //                     10)
 //                  )
 //                  // Ensure all queries which (transitively) contain the variable to be completed, are 'resolved'
-//                  .$(S.fix2(
-//                	 S.seq(S.limit(1, S.select(Mode.ENUM, CResolveQuery.class, cresolveQueryContainsCompletionVarTransitively)))
-//                        .$(S.resolve())
+//                  .$(fix2(
+//                	 seq(limit(1, select(Mode.ENUM, CResolveQuery.class, cresolveQueryContainsCompletionVarTransitively)))
+//                        .$(resolve())
 //                        .$(),
-//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     seq(infer()).$(delayStuckQueries()).$(),
 //                     c -> !(c instanceof CResolveQuery) || (cresolveQueryContainsCompletionVarTransitively.test((CResolveQuery)c)),
 //                     10)
 //                  )
 //                  // Ensure all user constraints which (transitively) contain the variable to be completed, are deterministically expanded
-//                  .$(S.fix2(
+//                  .$(fix2(
 //                          // single()
-//                     S.seq(S.limit(1, S.select(Mode.ENUM, CUser.class, cuserContainsCompletionVarTransitively)))
-//                        .$(S.expand(Mode.ENUM))
+//                     seq(limit(1, select(Mode.ENUM, CUser.class, cuserContainsCompletionVarTransitively)))
+//                        .$(expand(Mode.ENUM))
 //                        .$(),
-//                     S.seq(S.infer()).$(S.delayStuckQueries()).$(),
+//                     seq(infer()).$(delayStuckQueries()).$(),
 //                     c -> !(c instanceof CUser) || (cuserContainsCompletionVarTransitively.test((CUser)c)),
 //                     10)
 //                  )
@@ -139,14 +171,14 @@ public class Paret {
 //        fragments.forEach((n,r) -> {
 //            log.info(" * {}", r);
 //        });
-        return S.repeat(S.limit(10, S.fix(
-            S.seq(selectConstraint(1))
-            .$(S.match(
-               S.limit(3, S.seq(S.limit(5, S.resolve())).$(S.infer()).$()),
-               S.limit(1, S.seq(
-//                            S.concat(S.limit(5, S.expand(Mode.RND, defaultRuleWeight, ruleWeights)), S.expand(Mode.ENUM, fragments))
-                            S.limit(5, S.expand(Mode.RND, defaultRuleWeight, ruleWeights))
-                          ).$(S.infer()).$())))
+        return repeat(limit(10, fix(
+            seq(selectConstraint(1))
+            .$(match(
+               limit(3, seq(limit(5, resolve())).$(infer()).$()),
+               limit(1, seq(
+//                            concat(limit(5, expand(Mode.RND, defaultRuleWeight, ruleWeights)), expand(Mode.ENUM, fragments))
+                            limit(5, expand(Mode.RND, defaultRuleWeight, ruleWeights))
+                          ).$(infer()).$())))
             .$(),
             inferDelayAndDrop(),
             new Match(IS_RE), // everything except is_* constraints should be resolved
@@ -185,10 +217,10 @@ public class Paret {
     public SearchStrategy<SearchState, EitherSearchState<FocusedSearchState<CResolveQuery>, FocusedSearchState<CUser>>>
             selectConstraint(int limit) {
         // @formatter:off
-        return S.limit(limit, S.concatAlt(
+        return limit(limit, concatAlt(
             // TWEAK Resolve queries first, to improve inference
-            S.select(Mode.RND, CResolveQuery.class, new Any<>()),
-            S.select(Mode.RND, CUser.class, /*Paret::predWeights*/ new Match(GEN_RE))
+            select(Mode.RND, CResolveQuery.class, new Any<>()),
+            select(Mode.RND, CUser.class, /*Paret::predWeights*/ new Match(GEN_RE))
         ));
         // @formatter:on
     }
@@ -218,13 +250,13 @@ public class Paret {
     // generation of id's
 
     private SearchStrategy<SearchState, SearchState> generateLex() {
-        return S.require(S.limit(1, S.fix(expandLex(), S.infer(), new Not<>(new Match(IS_RE)), -1)));
+        return require(limit(1, fix(expandLex(), infer(), new Not<>(new Match(IS_RE)), -1)));
     }
 
     private SearchStrategy<SearchState, SearchState> expandLex() {
         // @formatter:off
-        return S.seq(S.select(Mode.RND, CUser.class, new Match(IS_RE)))
-               .$(S.limit(1, S.seq(S.expand(Mode.RND, 1, idWeights)).$(S.infer()).$()))
+        return seq(select(Mode.RND, CUser.class, new Match(IS_RE)))
+               .$(limit(1, seq(expand(Mode.RND, 1, idWeights)).$(infer()).$()))
                .$();
         // @formatter:on
     }

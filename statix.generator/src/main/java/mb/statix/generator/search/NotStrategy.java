@@ -23,4 +23,14 @@ public final class NotStrategy implements SStrategy {
         return new GChoiceStrategy(this.strategy, new FailStrategy(), new IdStrategy()).apply(context, input);
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "not(" + strategy.toString(true) + ")";
+    }
+
 }

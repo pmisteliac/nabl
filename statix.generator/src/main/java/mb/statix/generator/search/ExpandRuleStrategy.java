@@ -71,4 +71,13 @@ public final class ExpandRuleStrategy implements SStrategy {
         return new StrategySearchState(applyState, constraints.freeze(), null, delays.freeze(), input.existentials(), completeness.freeze());
     }
 
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "expandRule";
+    }
 }

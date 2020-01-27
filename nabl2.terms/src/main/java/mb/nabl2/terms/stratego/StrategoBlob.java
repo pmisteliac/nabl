@@ -50,9 +50,9 @@ public class StrategoBlob extends AbstractSimpleTerm implements IStrategoTerm {
         return IStrategoTerm.BLOB;
     }
 
-    @Override public int getStorageType() {
-        return IStrategoTerm.IMMUTABLE;
-    }
+//    @Override public int getStorageType() {
+//        return IStrategoTerm.IMMUTABLE;
+//    }
 
     @SuppressWarnings("deprecation") @Override public IStrategoList getAnnotations() {
         return AbstractTermFactory.EMPTY_LIST;

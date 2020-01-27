@@ -27,4 +27,15 @@ public final class RepeatStrategy implements SStrategy {
         return result;
     }
 
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    @Override
+    public String toString(boolean inParens) {
+        return "repeat(" + strategy.toString(true) + ")";
+    }
+
 }

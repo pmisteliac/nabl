@@ -15,4 +15,5 @@ public interface SStrategy {
      */
     StrategyNode apply(StrategyContext context, StrategyNode input);
 
+    String toString(boolean inParens);
 }
