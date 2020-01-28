@@ -141,11 +141,12 @@ public interface Sequence<T> extends Iterator<T> {
              * or that {@link #currentSequence} is null if we've reached the end of the sequences.
              */
             private void ensureSequence() {
-                if (this.currentSequence != null && this.currentSequence.hasNext()) return;
-                if (seqs.hasNext()) {
+                while (this.currentSequence == null || !this.currentSequence.hasNext()) {
+                    if (!seqs.hasNext()) {
+                        this.currentSequence = null;
+                        break;
+                    }
                     this.currentSequence = seqs.next();
-                } else {
-                    this.currentSequence = null;
                 }
             }
         };
@@ -167,7 +168,8 @@ public interface Sequence<T> extends Iterator<T> {
 
             @Override
             protected R doNext() {
-                return f.apply(Sequence.this.next());
+                T next = Sequence.this.next();
+                return f.apply(next);
             }
         };
     }

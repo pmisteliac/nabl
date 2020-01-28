@@ -2,15 +2,11 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.*;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * The ! strategy, which always succeeds and cuts the branches.
  */
-public final class CutStrategy<T> implements SearchStrategy<T, T> {
+public final class CutStrategy<T, CTX> implements Strategy<T, T, CTX> {
 
     private Sequence<?> branches;
 
@@ -23,9 +19,9 @@ public final class CutStrategy<T> implements SearchStrategy<T, T> {
     }
 
     @Override
-    public Sequence<SearchNode<T>> apply(SearchContext ctx, SearchNode<T> input) {
+    public Sequence<T> apply(CTX ctx, T input) {
         this.branches.cut();
-        return Sequence.of(new SearchNode<>(input.getValue()));
+        return Sequence.of(input);
     }
 
     @Override

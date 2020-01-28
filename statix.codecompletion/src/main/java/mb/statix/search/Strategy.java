@@ -1,0 +1,18 @@
+package mb.statix.search;
+
+/**
+ * A strategy, which takes an input and produces a list of outputs.
+ */
+@FunctionalInterface
+public interface Strategy<I, O, CTX> {
+
+    /**
+     * Applies the search strategy.
+     *
+     * @param ctx the search context
+     * @param input the input
+     * @return a sequence of results; or an empty sequence when the strategy failed
+     */
+    Sequence<O> apply(CTX ctx, I input);
+
+}

@@ -2,22 +2,24 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.*;
 
+import java.util.List;
+
 
 /**
  * The s1; s2 strategy.
  */
-public final class SeqStrategy<A, B, C> implements SearchStrategy<A, C> {
+public final class SeqStrategy<A, B, C, CTX> implements Strategy<A, C, CTX> {
 
-    private final SearchStrategy<A, B> strategy1;
-    private final SearchStrategy<B, C> strategy2;
+    private final Strategy<A, B, CTX> strategy1;
+    private final Strategy<B, C, CTX> strategy2;
 
-    public SeqStrategy(SearchStrategy<A, B> strategy1, SearchStrategy<B, C> strategy2) {
+    public SeqStrategy(Strategy<A, B, CTX> strategy1, Strategy<B, C, CTX> strategy2) {
         this.strategy1 = strategy1;
         this.strategy2 = strategy2;
     }
 
     @Override
-    public Sequence<SearchNode<C>> apply(SearchContext ctx, SearchNode<A> input){
+    public Sequence<C> apply(CTX ctx, A input){
         return this.strategy1.apply(ctx, input).flatMap(n -> this.strategy2.apply(ctx, n));
     }
 

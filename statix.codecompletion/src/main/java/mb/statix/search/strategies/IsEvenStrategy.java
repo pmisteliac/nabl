@@ -2,20 +2,16 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.*;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * The isEven() strategy.
  */
-public final class IsEvenStrategy implements SearchStrategy<Integer, Integer> {
+public final class IsEvenStrategy<CTX> implements Strategy<Integer, Integer, CTX> {
 
     @Override
-    public Sequence<SearchNode<Integer>> apply(SearchContext ctx, SearchNode<Integer> input) {
-        if (input.getValue() % 2 == 0) {
-            return Sequence.of(new SearchNode<>(input.getValue()));
+    public Sequence<Integer> apply(CTX ctx, Integer input) {
+        if (input % 2 == 0) {
+            return Sequence.of(input);
         } else {
             return Sequence.empty();
         }

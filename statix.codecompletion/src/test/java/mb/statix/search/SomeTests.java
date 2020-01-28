@@ -8,26 +8,22 @@ import static mb.statix.search.strategies.Strategies.*;
 
 public class SomeTests {
 
-//    public void g() {
-//        List<String> lst = Collections.emptyList();
-//        lst.stream().map(s -> s.length()).map()
-//    }
 
     @Test
     public void f() {
 //        SearchStrategy<Integer, Integer> strategy = or(inc(), id());
-        SearchStrategy<Integer, Integer> strategy = seq(or(inc(), id()), isEven());
+        Strategy<Integer, Integer, Object> strategy = seq(or(inc(), id()), isEven());
 
-        SearchNode<Integer> rootNode = new SearchNode<>(10);
-        Sequence<SearchNode<Integer>> seq = strategy.apply(null, rootNode);
-        List<SearchNode<Integer>> results = seq.toList();
+//        SearchNode<Integer> rootNode = new SearchNode<>(10);
+        Sequence<Integer> seq = strategy.apply(null, 10);
+        List<Integer> results = seq.toList();
 
         System.out.println("SUCCEEDS:");
         if (results.isEmpty()) {
             System.out.println("  <none>");
         } else {
-            for (SearchNode<Integer> succeed : results) {
-                System.out.println("  " + succeed.getValue());
+            for (Integer succeed : results) {
+                System.out.println("  " + succeed);
             }
         }
 

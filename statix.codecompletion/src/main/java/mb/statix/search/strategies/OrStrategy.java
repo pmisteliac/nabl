@@ -6,18 +6,18 @@ import mb.statix.search.*;
 /**
  * The non-deterministic or() strategy, which splits the search tree.
  */
-public final class OrStrategy<I, O> implements SearchStrategy<I, O> {
+public final class OrStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
 
-    private final SearchStrategy<I, O> strategy1;
-    private final SearchStrategy<I, O> strategy2;
+    private final Strategy<I, O, CTX> strategy1;
+    private final Strategy<I, O, CTX> strategy2;
 
-    public OrStrategy(SearchStrategy<I, O> strategy1, SearchStrategy<I, O> strategy2) {
+    public OrStrategy(Strategy<I, O, CTX> strategy1, Strategy<I, O, CTX> strategy2) {
         this.strategy1 = strategy1;
         this.strategy2 = strategy2;
     }
 
     @Override
-    public Sequence<SearchNode<O>> apply(SearchContext ctx, SearchNode<I> input) {
+    public Sequence<O> apply(CTX ctx, I input) {
         return this.strategy1.apply(ctx, input).concatWith(this.strategy2.apply(ctx, input));
     }
 

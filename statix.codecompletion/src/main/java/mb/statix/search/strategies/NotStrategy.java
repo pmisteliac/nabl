@@ -6,18 +6,18 @@ import mb.statix.search.*;
 /**
  * The not(s) strategy, which applies s, then succeeds if s fails and fails if s succeeds.
  */
-public final class NotStrategy<T> implements SearchStrategy<T, T> {
+public final class NotStrategy<T, CTX> implements Strategy<T, T, CTX> {
 
-    private final SearchStrategy<T, T> tryStrategy;
+    private final Strategy<T, T, CTX> tryStrategy;
 
-    public NotStrategy(SearchStrategy<T, T> tryStrategy) {
+    public NotStrategy(Strategy<T, T, CTX> tryStrategy) {
         this.tryStrategy = tryStrategy;
     }
 
     @Override
-    public Sequence<SearchNode<T>> apply(SearchContext ctx, SearchNode<T> input) {
-        Sequence<SearchNode<T>> elseBranch = Sequence.of(input);
-        Sequence<SearchNode<T>> thenBranch = new SeqStrategy<>(
+    public Sequence<T> apply(CTX ctx, T input) {
+        Sequence<T> elseBranch = Sequence.of(input);
+        Sequence<T> thenBranch = new SeqStrategy<>(
                 this.tryStrategy, new SeqStrategy<>(
                 new CutStrategy<>(elseBranch),
                 new FailStrategy<>()))

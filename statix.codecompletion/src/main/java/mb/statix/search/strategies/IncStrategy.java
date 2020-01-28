@@ -2,19 +2,15 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.*;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * The inc() strategy.
  */
-public final class IncStrategy implements SearchStrategy<Integer, Integer> {
+public final class IncStrategy<CTX> implements Strategy<Integer, Integer, CTX> {
 
     @Override
-    public Sequence<SearchNode<Integer>> apply(SearchContext ctx, SearchNode<Integer> input) {
-        return Sequence.of(new SearchNode<>(input.getValue() + 1));
+    public Sequence<Integer> apply(CTX ctx, Integer input) {
+        return Sequence.of(input + 1);
     }
 
     @Override

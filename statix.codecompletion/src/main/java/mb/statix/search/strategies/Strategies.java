@@ -1,6 +1,6 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.SearchStrategy;
+import mb.statix.search.Strategy;
 import mb.statix.search.Sequence;
 
 
@@ -9,43 +9,43 @@ import mb.statix.search.Sequence;
  */
 public final class Strategies {
 
-    public static <T> CutStrategy<T> cut(Sequence<?> sequence) {
+    public static <T, CTX> CutStrategy<T, CTX> cut(Sequence<?> sequence) {
         return new CutStrategy<>(sequence);
     }
 
-    public static <T> FailStrategy<T> fail() {
+    public static <T, CTX> FailStrategy<T, CTX> fail() {
         return new FailStrategy<>();
     }
 
-    public static <A, B, C> GChoiceStrategy<A, B, C> gChoice(SearchStrategy<A, B> tryStrategy, SearchStrategy<B, C> thenStrategy, SearchStrategy<A, C> elseStrategy) {
+    public static <A, B, C, CTX> GChoiceStrategy<A, B, C, CTX> gChoice(Strategy<A, B, CTX> tryStrategy, Strategy<B, C, CTX> thenStrategy, Strategy<A, C, CTX> elseStrategy) {
         return new GChoiceStrategy<>(tryStrategy, thenStrategy, elseStrategy);
     }
 
-    public static <T> IdStrategy<T> id() {
+    public static <T, CTX> IdStrategy<T, CTX> id() {
         return new IdStrategy<>();
     }
 
-    public static IncStrategy inc() {
+    public static <CTX> IncStrategy<CTX> inc() {
         return new IncStrategy();
     }
 
-    public static IsEvenStrategy isEven() {
-        return new IsEvenStrategy();
+    public static <CTX> IsEvenStrategy<CTX> isEven() {
+        return new IsEvenStrategy<>();
     }
 
-    public static <T> NotStrategy<T> not(SearchStrategy<T, T> strategy) {
-        return new NotStrategy<T>(strategy);
+    public static <T, CTX> NotStrategy<T, CTX> not(Strategy<T, T, CTX> strategy) {
+        return new NotStrategy<>(strategy);
     }
 
-    public static <T, R> OrStrategy<T, R> or(SearchStrategy<T, R> strategy1, SearchStrategy<T, R> strategy2) {
+    public static <T, R, CTX> OrStrategy<T, R, CTX> or(Strategy<T, R, CTX> strategy1, Strategy<T, R, CTX> strategy2) {
         return new OrStrategy<>(strategy1, strategy2);
     }
 
-    public static <A, B, C> SeqStrategy<A, B, C> seq(SearchStrategy<A, B> strategy1, SearchStrategy<B, C> strategy2) {
+    public static <A, B, C, CTX> SeqStrategy<A, B, C, CTX> seq(Strategy<A, B, CTX> strategy1, Strategy<B, C, CTX> strategy2) {
         return new SeqStrategy<>(strategy1, strategy2);
     }
 
-    public static <T> AsStringStrategy<T> asString() {
+    public static <T, CTX> AsStringStrategy<T, CTX> asString() {
         return new AsStringStrategy<>();
     }
 
