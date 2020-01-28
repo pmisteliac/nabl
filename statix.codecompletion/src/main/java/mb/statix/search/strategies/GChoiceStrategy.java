@@ -2,39 +2,32 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.*;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * The (s < t + e) guarded choice strategy, which applies s, then t if it succeeds or e if it fails.
  */
-public final class GChoiceStrategy<T> implements SearchStrategy<T> {
+public final class GChoiceStrategy<A, B, C> implements SearchStrategy<A, C> {
 
-    private final SearchStrategy<T> tryStrategy;
-    private final SearchStrategy<T> thenStrategy;
-    private final SearchStrategy<T> elseStrategy;
+    private final SearchStrategy<A, B> tryStrategy;
+    private final SearchStrategy<B, C> thenStrategy;
+    private final SearchStrategy<A, C> elseStrategy;
 
-    public GChoiceStrategy(SearchStrategy<T> tryStrategy, SearchStrategy<T> thenStrategy, SearchStrategy<T> elseStrategy) {
+    public GChoiceStrategy(SearchStrategy<A, B> tryStrategy, SearchStrategy<B, C> thenStrategy, SearchStrategy<A, C> elseStrategy) {
         this.tryStrategy = tryStrategy;
         this.thenStrategy = thenStrategy;
         this.elseStrategy = elseStrategy;
     }
 
     @Override
-    public List<SearchNode<T>> eval(SearchContext ctx, SearchNode<T> input, @Nullable SearchComputation<T> next) {
-        SearchNode<T> branch2 = new SearchNode<>(input.getValue(), new SearchComputation<>(this.tryStrategy,
-                new SearchComputation<>(this.elseStrategy, next)));
-        SearchNode<T> branch1 = new SearchNode<>(input.getValue(), new SearchComputation<>(this.tryStrategy,
-                new SearchComputation<>(new CutStrategy<>(Collections.singletonList(branch2)),
-                        new SearchComputation<>(this.thenStrategy, next))));
+    public Sequence<SearchNode<C>> apply(SearchContext ctx, SearchNode<A> input) {
+        Sequence<SearchNode<C>> elseBranch = this.elseStrategy.apply(ctx, input);
+        Sequence<SearchNode<C>> thenBranch = new SeqStrategy<>(
+                this.tryStrategy, new SeqStrategy<>(
+                        new CutStrategy<>(elseBranch),
+                        this.thenStrategy))
+                .apply(ctx, input);
 
-        return Arrays.asList(
-                branch1,
-                branch2
-        );
+        return thenBranch.concatWith(elseBranch);
     }
 
     @Override

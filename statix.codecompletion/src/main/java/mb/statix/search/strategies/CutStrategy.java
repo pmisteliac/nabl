@@ -1,9 +1,6 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.SearchComputation;
-import mb.statix.search.SearchContext;
-import mb.statix.search.SearchNode;
-import mb.statix.search.SearchStrategy;
+import mb.statix.search.*;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -13,22 +10,22 @@ import java.util.List;
 /**
  * The ! strategy, which always succeeds and cuts the branches.
  */
-public final class CutStrategy<T> implements SearchStrategy<T> {
+public final class CutStrategy<T> implements SearchStrategy<T, T> {
 
-    private List<SearchNode<?>> branches;
+    private Sequence<?> branches;
 
     /**
      * Initializes a new instance of the {@link CutStrategy} class.
      * @param branches the branches to cut when this is evaluated
      */
-    public CutStrategy(List<SearchNode<?>> branches) {
+    public CutStrategy(Sequence<?> branches) {
         this.branches = branches;
     }
 
     @Override
-    public List<SearchNode<T>> eval(SearchContext ctx, SearchNode<T> input, @Nullable SearchComputation<T> next) {
-        this.branches.forEach(SearchNode::cut);
-        return Collections.singletonList(new SearchNode<>(input.getValue(), next));
+    public Sequence<SearchNode<T>> apply(SearchContext ctx, SearchNode<T> input) {
+        this.branches.cut();
+        return Sequence.of(new SearchNode<>(input.getValue()));
     }
 
     @Override

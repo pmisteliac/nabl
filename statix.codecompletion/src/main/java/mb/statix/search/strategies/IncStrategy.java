@@ -1,9 +1,6 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.SearchComputation;
-import mb.statix.search.SearchContext;
-import mb.statix.search.SearchNode;
-import mb.statix.search.SearchStrategy;
+import mb.statix.search.*;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -13,11 +10,11 @@ import java.util.List;
 /**
  * The inc() strategy.
  */
-public final class IncStrategy implements SearchStrategy<Integer> {
+public final class IncStrategy implements SearchStrategy<Integer, Integer> {
 
     @Override
-    public List<SearchNode<Integer>> eval(SearchContext ctx, SearchNode<Integer> input, @Nullable SearchComputation<Integer> next) {
-        return Collections.singletonList(new SearchNode<>(input.getValue() + 1, next));
+    public Sequence<SearchNode<Integer>> apply(SearchContext ctx, SearchNode<Integer> input) {
+        return Sequence.of(new SearchNode<>(input.getValue() + 1));
     }
 
     @Override

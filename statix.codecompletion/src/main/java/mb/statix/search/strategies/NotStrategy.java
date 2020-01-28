@@ -1,37 +1,29 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.SearchComputation;
-import mb.statix.search.SearchContext;
-import mb.statix.search.SearchNode;
-import mb.statix.search.SearchStrategy;
-
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import mb.statix.search.*;
 
 
 /**
  * The not(s) strategy, which applies s, then succeeds if s fails and fails if s succeeds.
  */
-public final class NotStrategy<T> implements SearchStrategy<T> {
+public final class NotStrategy<T> implements SearchStrategy<T, T> {
 
-    private final SearchStrategy<T> tryStrategy;
+    private final SearchStrategy<T, T> tryStrategy;
 
-    public NotStrategy(SearchStrategy<T> tryStrategy) {
+    public NotStrategy(SearchStrategy<T, T> tryStrategy) {
         this.tryStrategy = tryStrategy;
     }
 
     @Override
-    public List<SearchNode<T>> eval(SearchContext ctx, SearchNode<T> input, @Nullable SearchComputation<T> next) {
-        SearchNode<T> branch2 = new SearchNode<>(input.getValue(), next);
-        SearchNode<T> branch1 = new SearchNode<>(input.getValue(), new SearchComputation<>(this.tryStrategy,
-                new SearchComputation<>(new CutStrategy<>(Collections.singletonList(branch2)), next)));
+    public Sequence<SearchNode<T>> apply(SearchContext ctx, SearchNode<T> input) {
+        Sequence<SearchNode<T>> elseBranch = Sequence.of(input);
+        Sequence<SearchNode<T>> thenBranch = new SeqStrategy<>(
+                this.tryStrategy, new SeqStrategy<>(
+                new CutStrategy<>(elseBranch),
+                new FailStrategy<>()))
+                .apply(ctx, input);
 
-        return Arrays.asList(
-                branch1,
-                branch2
-        );
+        return thenBranch.concatWith(elseBranch);
     }
 
     @Override

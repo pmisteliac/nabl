@@ -1,9 +1,6 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.SearchComputation;
-import mb.statix.search.SearchContext;
-import mb.statix.search.SearchNode;
-import mb.statix.search.SearchStrategy;
+import mb.statix.search.*;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -13,14 +10,14 @@ import java.util.List;
 /**
  * The isEven() strategy.
  */
-public final class IsEvenStrategy implements SearchStrategy<Integer> {
+public final class IsEvenStrategy implements SearchStrategy<Integer, Integer> {
 
     @Override
-    public List<SearchNode<Integer>> eval(SearchContext ctx, SearchNode<Integer> input, @Nullable SearchComputation<Integer> next) {
+    public Sequence<SearchNode<Integer>> apply(SearchContext ctx, SearchNode<Integer> input) {
         if (input.getValue() % 2 == 0) {
-            return Collections.singletonList(new SearchNode<>(input.getValue(), next));
+            return Sequence.of(new SearchNode<>(input.getValue()));
         } else {
-            return Collections.emptyList();
+            return Sequence.empty();
         }
     }
 

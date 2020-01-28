@@ -7,10 +7,10 @@ import java.util.List;
 /**
  * A search computation.
  */
-public final class SearchComputation<T> {
+public final class SearchComputation<I, O> {
 
-    private final SearchStrategy<T> strategy;
-    @Nullable private final SearchComputation<T> next;
+    private final SearchStrategy<I, O> strategy;
+    @Nullable private final SearchComputation<O, O> next;
 
     /**
      * Initializes a new instance of the {@link SearchComputation} class.
@@ -18,17 +18,17 @@ public final class SearchComputation<T> {
      * @param strategy the search strategy to evaluate
      * @param next the next computation to perform
      */
-    public SearchComputation(SearchStrategy<T> strategy, @Nullable SearchComputation<T> next) {
+    public SearchComputation(SearchStrategy<I, O> strategy, @Nullable SearchComputation<O, O> next) {
         this.strategy = strategy;
         this.next = next;
     }
 
-    public SearchStrategy<T> getStrategy() {
+    public SearchStrategy<I, O> getStrategy() {
         return this.strategy;
     }
 
     @Nullable
-    public SearchComputation<T> getNext() {
+    public SearchComputation<O, O> getNext() {
         return this.next;
     }
 
