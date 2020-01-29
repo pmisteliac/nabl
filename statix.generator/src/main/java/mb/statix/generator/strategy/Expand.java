@@ -39,7 +39,6 @@ import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
-import mb.statix.spec.Spec;
 
 import javax.annotation.Nullable;
 
@@ -115,7 +114,7 @@ final class Expand extends SearchStrategy<FocusedSearchState<CUser>, SearchState
     private java.util.Map<Rule, Double> getWeightedRules(SearchContext ctx, String name) {
         try {
             return cache.get(name, () -> {
-                final java.util.Set<Rule> rs = getUnorderedRules(ctx).get(name);
+                final java.util.Set<Rule> rs = ctx.spec().rules().getIndependentRules(name);
                 final java.util.Map<String, Long> rcs =
                         rs.stream().collect(Collectors.groupingBy(Rule::label, Collectors.counting()));
                 // ImmutableMap iterates over keys in insertion-order
@@ -129,14 +128,6 @@ final class Expand extends SearchStrategy<FocusedSearchState<CUser>, SearchState
             });
         } catch(ExecutionException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private SetMultimap<String, Rule> getUnorderedRules(SearchContext ctx) {
-        if (this.rules != null) {
-            return rules;
-        } else {
-            return ctx.getUnorderedRules();
         }
     }
 

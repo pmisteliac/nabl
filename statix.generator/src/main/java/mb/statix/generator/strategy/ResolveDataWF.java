@@ -40,7 +40,7 @@ public class ResolveDataWF implements DataWF<ITerm, CEqual> {
     private final IConstraint cause;
 
     public ResolveDataWF(Spec spec, IState.Immutable state, ICompleteness.Immutable completeness, Rule dataWf,
-            IConstraint cause) {
+                         IConstraint cause) {
         this.spec = spec;
         this.state = state;
         this.completeness = completeness;

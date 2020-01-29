@@ -1,7 +1,6 @@
 package mb.statix.completions;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.SetMultimap;
 import mb.statix.constraints.CUser;
 import mb.statix.generator.SearchState;
 import mb.statix.generator.search.SStrategy;
@@ -10,8 +9,6 @@ import mb.statix.generator.search.StrategyNode;
 import mb.statix.generator.search.StrategySearchState;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
-import mb.statix.spec.Rule;
-import mb.statix.spec.RuleUtil;
 import mb.statix.spec.Spec;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
@@ -46,17 +43,17 @@ public final class TermCompleter2 {
 
         final StrategyContext ctx = new StrategyContext() {
         	
-        	private final SetMultimap<String, Rule> unorderedRules = RuleUtil.makeUnordered(spec.rules());
+//        	private final SetMultimap<String, Rule> unorderedRules = RuleUtil.makeUnordered(spec.rules());
 
 			@Override
 			public Spec getSpec() {
 				return spec;
 			}
 
-			@Override
-			public SetMultimap<String, Rule> getUnorderedRules() {
-				return unorderedRules;
-			}
+//			@Override
+//			public SetMultimap<String, Rule> getUnorderedRules() {
+//				return unorderedRules;
+//			}
 
         };
         return strategy.apply(ctx, StrategyNode.of(Stream.of(initalState)));

@@ -4,6 +4,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 
 import java.util.Collection;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Action2;
 
 import com.google.common.collect.ImmutableList;
@@ -15,7 +16,7 @@ import mb.statix.constraints.Constraints;
 import mb.statix.scopegraph.reference.CriticalEdge;
 import mb.statix.scopegraph.terms.Scope;
 import mb.statix.solver.IConstraint;
-import mb.statix.spec.Spec;
+
 
 public class CompletenessUtil {
 

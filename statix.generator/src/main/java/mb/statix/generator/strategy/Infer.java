@@ -9,7 +9,7 @@ import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
-import mb.statix.spec.Spec;
+
 
 final class Infer extends SearchStrategy<SearchState, SearchState> {
 

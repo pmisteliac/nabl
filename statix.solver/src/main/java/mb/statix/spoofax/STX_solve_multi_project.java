@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 import org.spoofax.interpreter.core.IContext;
@@ -32,7 +33,7 @@ import mb.statix.solver.IState;
 import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
-import mb.statix.spec.Spec;
+
 
 public class STX_solve_multi_project extends StatixPrimitive {
     private static final ILogger logger = LoggerUtils.logger(STX_solve_multi_project.class);

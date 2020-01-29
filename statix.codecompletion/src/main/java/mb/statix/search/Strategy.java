@@ -12,7 +12,8 @@ public interface Strategy<I, O, CTX> {
      * @param ctx the search context
      * @param input the input
      * @return a sequence of results; or an empty sequence when the strategy failed
+     * @throws InterruptedException the operation was interrupted
      */
-    Sequence<O> apply(CTX ctx, I input);
+    Sequence<O> apply(CTX ctx, I input) throws InterruptedException;
 
 }

@@ -21,7 +21,6 @@ import mb.statix.generator.SearchStrategy.Mode;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.solver.IConstraint;
 import mb.statix.spec.Rule;
-import mb.statix.spec.Spec;
 import org.metaborg.util.log.ILogger;
 
 

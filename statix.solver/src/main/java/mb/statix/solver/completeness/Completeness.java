@@ -15,6 +15,7 @@ import mb.statix.scopegraph.terms.Scope;
 import mb.statix.solver.IConstraint;
 import mb.statix.spec.Spec;
 
+
 public abstract class Completeness implements ICompleteness {
 
     protected abstract Map<ITerm, ? extends MultiSet<ITerm>> incomplete();

@@ -15,7 +15,7 @@ public final class NotStrategy<T, CTX> implements Strategy<T, T, CTX> {
     }
 
     @Override
-    public Sequence<T> apply(CTX ctx, T input) {
+    public Sequence<T> apply(CTX ctx, T input) throws InterruptedException {
         Sequence<T> elseBranch = Sequence.of(input);
         Sequence<T> thenBranch = new SeqStrategy<>(
                 this.tryStrategy, new SeqStrategy<>(

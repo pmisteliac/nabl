@@ -1,44 +1,25 @@
 package mb.statix.cli;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
-import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ITermVar;
-import mb.nabl2.util.TermFormatter;
 import mb.statix.completions.TermCompleter;
 import mb.statix.completions.TermCompleter2;
-import mb.statix.generator.SearchLogger;
 import mb.statix.generator.SearchState;
-import mb.statix.generator.SearchStrategy;
-import mb.statix.generator.nodes.SearchElement;
-import mb.statix.generator.nodes.SearchNode;
-import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.search.SStrategy;
 import mb.statix.generator.search.StrategyNode;
 import mb.statix.generator.search.StrategySearchState;
-import mb.statix.generator.util.StreamProgressPrinter;
-import mb.statix.solver.IConstraint;
 import mb.statix.spec.Spec;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
-import org.metaborg.core.action.TransformActionContrib;
 import org.metaborg.core.context.IContext;
-import org.metaborg.core.language.ILanguageImpl;
 import org.metaborg.spoofax.core.Spoofax;
 import org.metaborg.spoofax.core.shell.StatixGenerator;
-import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnit;
-import org.metaborg.util.functions.Function1;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.log.LoggerUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 

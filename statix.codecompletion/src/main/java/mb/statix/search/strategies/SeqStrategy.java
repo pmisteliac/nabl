@@ -19,8 +19,15 @@ public final class SeqStrategy<A, B, C, CTX> implements Strategy<A, C, CTX> {
     }
 
     @Override
-    public Sequence<C> apply(CTX ctx, A input){
-        return this.strategy1.apply(ctx, input).flatMap(n -> this.strategy2.apply(ctx, n));
+    public Sequence<C> apply(CTX ctx, A input) throws InterruptedException {
+        return this.strategy1.apply(ctx, input).flatMap(n -> {
+            try {
+                return this.strategy2.apply(ctx, n);
+            } catch (InterruptedException e) {
+                // Very annoying that we have to do this
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override

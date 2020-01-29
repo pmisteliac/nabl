@@ -21,7 +21,7 @@ import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.query.RegExpLabelWF;
 import mb.statix.solver.query.RelationLabelOrder;
-import mb.statix.spec.Spec;
+
 
 final class CanResolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, FocusedSearchState<CResolveQuery>> {
 

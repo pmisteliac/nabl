@@ -5,7 +5,7 @@ import mb.statix.generator.SearchState;
 import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.spec.Spec;
+
 
 final class Identity<I extends SearchState> extends SearchStrategy<I, I> {
 

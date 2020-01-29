@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import com.google.common.collect.Streams;
 
 import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
@@ -39,7 +38,6 @@ import mb.statix.generator.scopegraph.DataWF;
 import mb.statix.generator.scopegraph.Env;
 import mb.statix.generator.scopegraph.Match;
 import mb.statix.generator.scopegraph.NameResolution;
-import mb.statix.generator.util.RandomUtil;
 import mb.statix.generator.util.Subsets;
 import mb.statix.scopegraph.reference.LabelOrder;
 import mb.statix.scopegraph.reference.LabelWF;
@@ -50,7 +48,6 @@ import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.query.RegExpLabelWF;
 import mb.statix.solver.query.RelationLabelOrder;
-import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 
 final class Resolve extends SearchStrategy<FocusedSearchState<CResolveQuery>, SearchState> {

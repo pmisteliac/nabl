@@ -1,5 +1,6 @@
 package mb.statix.solver.persistent.query;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.log.Level;
 
 import com.google.common.collect.ImmutableList;
@@ -16,7 +17,7 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.query.ResolutionDelayException;
 import mb.statix.spec.Rule;
-import mb.statix.spec.Spec;
+
 
 class ConstraintDataLeq implements DataLeq<ITerm> {
 
@@ -28,7 +29,7 @@ class ConstraintDataLeq implements DataLeq<ITerm> {
     private volatile Boolean alwaysTrue;
 
     public ConstraintDataLeq(Spec spec, Rule constraint, IState.Immutable state, IsComplete isComplete,
-            IDebugContext debug) {
+                             IDebugContext debug) {
         this.spec = spec;
         this.constraint = constraint;
         this.state = state;

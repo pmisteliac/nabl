@@ -33,24 +33,24 @@ public class Solver {
     }
 
     public static SolverResult solve(final Spec spec, final IState.Immutable state, final IConstraint constraint,
-            final IDebugContext debug) throws InterruptedException {
+                                     final IDebugContext debug) throws InterruptedException {
         return solve(spec, state, constraint, (s, l, st) -> true, debug);
     }
 
     public static SolverResult solve(final Spec spec, final IState.Immutable state, final IConstraint constraint,
-            final IsComplete isComplete, final IDebugContext debug) throws InterruptedException {
+                                     final IsComplete isComplete, final IDebugContext debug) throws InterruptedException {
         return new GreedySolver(spec, state, constraint, isComplete, debug).solve();
         //return new StepSolver(spec, state, constraint, isComplete, debug).solve();
     }
 
     public static SolverResult solve(final Spec spec, final IState.Immutable state,
-            final Iterable<IConstraint> constraints, final Map<IConstraint, Delay> delays,
-            final ICompleteness.Immutable completeness, final IDebugContext debug) throws InterruptedException {
+                                     final Iterable<IConstraint> constraints, final Map<IConstraint, Delay> delays,
+                                     final ICompleteness.Immutable completeness, final IDebugContext debug) throws InterruptedException {
         return new GreedySolver(spec, state, constraints, delays, completeness, debug).solve();
     }
 
     public static boolean entails(final Spec spec, IState.Immutable state, final IConstraint constraint,
-            final IsComplete isComplete, final IDebugContext debug) throws Delay, InterruptedException {
+                                  final IsComplete isComplete, final IDebugContext debug) throws Delay, InterruptedException {
         final IUniDisunifier.Immutable unifier = state.unifier();
         if(debug.isEnabled(Level.Info)) {
             debug.info("Checking entailment of {}", toString(constraint, unifier));

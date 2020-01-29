@@ -13,13 +13,12 @@ import mb.statix.generator.FocusedSearchState;
 import mb.statix.generator.SearchContext;
 import mb.statix.generator.SearchState;
 import mb.statix.generator.SearchStrategy;
-import mb.statix.generator.SearchStrategy.Mode;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.util.RandomGenerator;
 import mb.statix.generator.util.StreamUtil;
 import mb.statix.solver.IConstraint;
-import mb.statix.spec.Spec;
+
 
 final class Select<C extends IConstraint> extends SearchStrategy<SearchState, FocusedSearchState<C>> {
 

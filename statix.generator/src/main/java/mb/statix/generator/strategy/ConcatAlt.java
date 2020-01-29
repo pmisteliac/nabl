@@ -10,7 +10,7 @@ import mb.statix.generator.SearchState;
 import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.spec.Spec;
+
 
 final class ConcatAlt<I extends SearchState, O1 extends SearchState, O2 extends SearchState>
         extends SearchStrategy<I, EitherSearchState<O1, O2>> {

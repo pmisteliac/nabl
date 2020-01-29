@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.log.Level;
 
@@ -77,7 +78,6 @@ import mb.statix.solver.store.BaseConstraintStore;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
-import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 
 class GreedySolver {
@@ -98,7 +98,7 @@ class GreedySolver {
     private final Map<IConstraint, IMessage> failed = Maps.newHashMap();
 
     public GreedySolver(Spec spec, IState.Immutable state, IConstraint initialConstraint, IsComplete _isComplete,
-            IDebugContext debug) {
+                        IDebugContext debug) {
         this.spec = spec;
         this.initialState = state;
         this.debug = debug;
@@ -114,7 +114,7 @@ class GreedySolver {
     }
 
     public GreedySolver(Spec spec, IState.Immutable state, Iterable<IConstraint> constraints,
-            Map<IConstraint, Delay> delays, ICompleteness.Immutable completeness, IDebugContext debug) {
+                        Map<IConstraint, Delay> delays, ICompleteness.Immutable completeness, IDebugContext debug) {
         this.spec = spec;
         this.initialState = state;
         this.debug = debug;

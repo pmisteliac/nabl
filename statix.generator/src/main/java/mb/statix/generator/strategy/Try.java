@@ -6,7 +6,7 @@ import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.util.StreamUtil;
-import mb.statix.spec.Spec;
+
 import java.util.stream.Stream;
 
 

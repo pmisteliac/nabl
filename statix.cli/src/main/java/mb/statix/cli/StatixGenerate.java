@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import mb.statix.generator.search.SStrategy;
 import mb.statix.generator.search.StrategyNode;
 import mb.statix.generator.search.StrategySearchState;
+import mb.statix.spec.Spec;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
@@ -34,7 +35,7 @@ import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.util.StreamProgressPrinter;
 import mb.statix.solver.IConstraint;
-import mb.statix.spec.Spec;
+
 
 public class StatixGenerate {
 

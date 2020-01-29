@@ -19,7 +19,7 @@ public final class CutStrategy<T, CTX> implements Strategy<T, T, CTX> {
     }
 
     @Override
-    public Sequence<T> apply(CTX ctx, T input) {
+    public Sequence<T> apply(CTX ctx, T input) throws InterruptedException {
         this.branches.cut();
         return Sequence.of(input);
     }

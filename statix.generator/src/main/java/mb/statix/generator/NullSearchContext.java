@@ -2,11 +2,9 @@ package mb.statix.generator;
 
 import java.util.Random;
 
-import com.google.common.collect.SetMultimap;
-
 import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
+
 
 public class NullSearchContext implements SearchContext {
 
@@ -32,9 +30,9 @@ public class NullSearchContext implements SearchContext {
 		return null;
 	}
 
-	@Override
-	public SetMultimap<String, Rule> getUnorderedRules() {
-		return null;
-	}
+//	@Override
+//	public SetMultimap<String, Rule> getUnorderedRules() {
+//		return null;
+//	}
 
 }

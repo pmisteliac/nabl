@@ -10,7 +10,7 @@ import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.util.StreamUtil;
-import mb.statix.spec.Spec;
+
 
 final class Repeat<I extends SearchState, O extends SearchState> extends SearchStrategy<I, O> {
     private final SearchStrategy<I, O> s;

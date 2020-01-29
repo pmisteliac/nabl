@@ -205,72 +205,6 @@ public class RuleUtil {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    /**
-     * Convert an ordered list of rules to a set of rules where the match order is reflected in (dis)equality
-     * constraints in the rule bodies. The resulting rules can be applied independent of the other rules in the set.
-     * Note that compared to using applyAll, mismatches may only be discovered when the body of the returned rules is
-     * evaluated, instead of during the matching process already.
-     * 
-     * @param rules
-     *            An ordered list of rules
-     * 
-     * @return A set of rules that are mutually independent
-     */
-    public static final java.util.Set<Rule> makeUnordered(Collection<Rule> rules) {
-        final List<Pattern> guards = Lists.newArrayList();
-        // go thorugh all rules in sequence
-        return rules.stream().<Rule>flatMap(r -> {
-            final IUniDisunifier.Transient diseqs = PersistentUniDisunifier.Immutable.of().melt();
-
-            // eliminate wildcards in the patterns
-            final FreshVars fresh = new FreshVars(r.varSet());
-            final List<Pattern> paramPatterns = r.params().stream().map(p -> p.eliminateWld(() -> fresh.fresh("_")))
-                    .collect(ImmutableList.toImmutableList());
-            fresh.fix();
-            final Pattern paramsPattern = P.newTuple(paramPatterns);
-
-            // create term for params and add implied equalities
-            final Tuple2<ITerm, List<Tuple2<ITermVar, ITerm>>> p_eqs = paramsPattern.asTerm(v -> v.get());
-            try {
-                if(!diseqs.unify(p_eqs._2()).isPresent()) {
-                    return Stream.empty();
-                }
-            } catch(OccursException e) {
-                return Stream.empty();
-            }
-
-            // add disunifications for all patterns from previous rules
-            final boolean guardsOk = guards.stream().allMatch(g -> {
-                final IRenaming swap = fresh.fresh(g.getVars());
-                final Pattern g1 = g.eliminateWld(() -> fresh.fresh("_"));
-                final Tuple2<ITerm, List<Tuple2<ITermVar, ITerm>>> t_eqs = g1.apply(swap).asTerm(v -> v.get());
-                // add internal equalities from the guard pattern, which are also reasons why the guard wouldn't match
-                final List<ITermVar> leftEqs =
-                        t_eqs._2().stream().map(Tuple2::_1).collect(ImmutableList.toImmutableList());
-                final List<ITerm> rightEqs =
-                        t_eqs._2().stream().map(Tuple2::_2).collect(ImmutableList.toImmutableList());
-                final ITerm left = B.newTuple(p_eqs._1(), B.newTuple(leftEqs));
-                final ITerm right = B.newTuple(t_eqs._1(), B.newTuple(rightEqs));
-                final java.util.Set<ITermVar> universals = fresh.reset();
-                return diseqs.disunify(universals, left, right).isPresent();
-            });
-            if(!guardsOk) {
-                return Stream.empty();
-            }
-
-            // add params as guard for next rule
-            guards.add(paramsPattern);
-
-            final IConstraint body = Constraints.conjoin(StateUtil.asInequalities(diseqs), r.body());
-            return Stream.of(r.withParams(paramPatterns).withBody(body));
-        }).collect(ImmutableSet.toImmutableSet());
-    }
-
-    public static final SetMultimap<String, Rule> makeUnordered(ListMultimap<String, Rule> rules) {
-        final ImmutableSetMultimap.Builder<String, Rule> newRules = ImmutableSetMultimap.builder();
-        rules.asMap().forEach((name, rs) -> newRules.putAll(name, makeUnordered(rs)));
-        return newRules.build();
-    }
 
     /**
      * Inline rule into the i-th matching premise of the second rule. Inlining always succeeds (use simplify to solve
@@ -368,20 +302,18 @@ public class RuleUtil {
      * includeRule determine which premises should be inlined. The fragments are closed only w.r.t. the included
      * predicates.
      */
-    public static final SetMultimap<String, Rule> makeFragments(ListMultimap<String, Rule> orderedRules,
+    public static final SetMultimap<String, Rule> makeFragments(RuleSet ruleSet,
             Predicate1<String> includePredicate, Predicate2<String, String> includeRule, int generations) {
         final SetMultimap<String, Rule> fragments = HashMultimap.create();
 
         // 1. make all rules unordered, and keep included rules
         final SetMultimap<String, Rule> rules = HashMultimap.create();
         // @formatter:off
-        orderedRules.asMap().entrySet().stream()
-                .filter(e -> includePredicate.test(e.getKey()))
-                .forEach(e -> {
-                    makeUnordered(e.getValue()).stream()
-                            .filter(r -> includeRule.test(r.name(), r.label()))
-                            .forEach(r -> rules.put(e.getKey(), r));
-                });
+        ruleSet.getRuleNames().stream()
+                .filter(includePredicate::test)
+                .forEach(n -> ruleSet.getIndependentRules(n).stream()
+                        .filter(r -> includeRule.test(r.name(), r.label()))
+                        .forEach(r -> rules.put(n, r)));
         // @formatter:on
 
         final PartialFunction1<IConstraint, CUser> expandable =

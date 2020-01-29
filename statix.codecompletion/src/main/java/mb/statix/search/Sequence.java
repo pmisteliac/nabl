@@ -30,6 +30,8 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Returns an empty sequence.
      *
+     * This is an initial operation.
+     *
      * @param <T> the type of elements in the sequence
      * @return the new sequence
      */
@@ -41,6 +43,8 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Returns an empty sequence.
      *
+     * This is an initial operation.
+     *
      * @param <T> the type of elements in the sequence
      * @return the new sequence
      */
@@ -50,6 +54,8 @@ public interface Sequence<T> extends Iterator<T> {
 
     /**
      * Returns the specified elements as a sequence.
+     *
+     * This is an initial operation.
      *
      * @param es the elements in the sequence
      * @param <T> the type of elements in the sequence
@@ -78,6 +84,8 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Returns the specified iterable as a sequence.
      *
+     * This is an initial operation.
+     *
      * @param iterable the iterable
      * @param <T> the type of elements in the sequence
      * @return the new sequence
@@ -103,6 +111,8 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Concatenates the specific sequence after this sequence.
      *
+     * This is an intermediate operation.
+     *
      * @param seq the sequence to concatenate after this one
      * @return the new sequence
      */
@@ -112,6 +122,8 @@ public interface Sequence<T> extends Iterator<T> {
 
     /**
      * Flattens the given sequences.
+     *
+     * This is an intermediate operation.
      *
      * @param seqs the sequences to flatten
      * @param <T> the type of elements in the sequences
@@ -155,6 +167,8 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Applies a function to each element of the sequence.
      *
+     * This is an intermediate operation.
+     *
      * @param f the function to apply
      * @param <R> the type of element resulting from the function
      * @return the new sequence
@@ -174,12 +188,23 @@ public interface Sequence<T> extends Iterator<T> {
         };
     }
 
+    /**
+     * Applies a function to each element of the sequence, and flattens the resulting sequences.
+     *
+     * This is an intermediate operation.
+     *
+     * @param f the function to apply
+     * @param <R> the type of sequence elements resulting from the function
+     * @return the new sequence
+     */
     default <R> Sequence<R> flatMap(Function<T, Sequence<R>> f) {
         return flatten(Sequence.this.map(f));
     }
 
     /**
      * Applies a side-effectful action to each element of the sequence.
+     *
+     * This is an intermediate operation.
      *
      * @param a the action
      * @return the unaltered sequence
@@ -201,41 +226,102 @@ public interface Sequence<T> extends Iterator<T> {
     }
 
     /**
-     * Buffers the input sequence.
+     * Takes a number of elements from the sequence.
      *
-     * @return a new sequence
+     * This is an intermediate operation.
+     *
+     * @param amount the number of elements to take at maximum
+     * @return the new sequence
      */
-    default Sequence<T> buffer() {
-        return new SequenceBase<T>() {
-            @Nullable private List<T> buffer = null;
+    default Sequence<T> take(int amount) {
+       return new SequenceBase<T>() {
 
-            private int index = 0;
+           int remaining = amount;
+
+           @Override
+           protected boolean doHasNext() {
+               return remaining > 0 && Sequence.this.hasNext();
+           }
+
+           @Override
+           protected T doNext() {
+               if (remaining <= 0) throw new NoSuchElementException();
+               T next = Sequence.this.next();
+               remaining -= 1;
+               return next;
+           }
+       };
+    }
+
+    /**
+     * Drops a number of elements from the sequence.
+     *
+     * This is an intermediate operation, but it evaluates the elements that are dropped.
+     *
+     * @param amount the number of elements to skip
+     * @return the new sequence
+     */
+    default Sequence<T> drop(int amount) {
+        return new SequenceBase<T>() {
+
+            boolean skipped = false;
 
             @Override
             protected boolean doHasNext() {
-                List<T> buffer = getBuffer();
-                return index < buffer.size();
+                skipAll();
+                return Sequence.this.hasNext();
             }
 
             @Override
             protected T doNext() {
-                List<T> buffer = getBuffer();
-                T e = buffer.get(index);
-                index += 1;
-                return e;
+                skipAll();
+                return Sequence.this.next();
             }
 
-            private List<T> getBuffer() {
-                if (this.buffer == null) {
-                    this.buffer = Sequence.this.toList();
+            private void skipAll() {
+                if (skipped) return;
+                int toSkip = amount;
+                while (toSkip > 0 && Sequence.this.hasNext()) {
+                    // We don't care about the result
+                    Sequence.this.next();
+                    toSkip -= 1;
                 }
-                return this.buffer;
+                skipped = true;
             }
         };
     }
 
+    // ------------------------------------------------------------------ //
+
+
+    /**
+     * Buffers the input sequence.
+     *
+     * This is a terminal operation.
+     *
+     * @return a new sequence
+     */
+    default Sequence<T> buffer() {
+        return Sequence.from(Sequence.this.toList());
+    }
+
+    /**
+     * Applies a function to the buffered sequence.
+     *
+     * This is a terminal operation.
+     *
+     * @param f the function to apply
+     * @param <R> the type of elements in the resulting sequence
+     * @return the new sequence
+     */
+    default <R> Sequence<R> transform(Function<List<T>, Iterable<R>> f) {
+        return Sequence.from(f.apply(Sequence.this.toList()));
+    }
+
     /**
      * Coerces the sequence into a list.
+     *
+     * This is a terminal operation.
      *
      * @return the list of elements
      */

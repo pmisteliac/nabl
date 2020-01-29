@@ -19,7 +19,7 @@ public final class GChoiceStrategy<A, B, C, CTX> implements Strategy<A, C, CTX> 
     }
 
     @Override
-    public Sequence<C> apply(CTX ctx, A input) {
+    public Sequence<C> apply(CTX ctx, A input) throws InterruptedException {
         Sequence<C> elseBranch = this.elseStrategy.apply(ctx, input);
         Sequence<C> thenBranch = new SeqStrategy<>(
                 this.tryStrategy, new SeqStrategy<>(

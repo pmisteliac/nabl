@@ -12,7 +12,8 @@ public class SomeTests {
     @Test
     public void f() {
 //        SearchStrategy<Integer, Integer> strategy = or(inc(), id());
-        Strategy<Integer, Integer, Object> strategy = seq(or(inc(), id()), isEven());
+//        Strategy<Integer, Integer, Object> strategy = seq(or(inc(), id()), gChoice(isEven(), inc(), id()));
+        Strategy<Integer, Integer, Object> strategy = seq(or(inc(), id()), not(isEven()));
 
 //        SearchNode<Integer> rootNode = new SearchNode<>(10);
         Sequence<Integer> seq = strategy.apply(null, 10);

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Function1;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.Level;
@@ -43,7 +44,7 @@ import mb.statix.solver.log.LoggerDebugContext;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.spec.Rule;
-import mb.statix.spec.Spec;
+
 
 public abstract class StatixPrimitive extends AbstractPrimitive {
     private static final ILogger logger = LoggerUtils.logger(StatixPrimitive.class);

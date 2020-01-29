@@ -9,7 +9,7 @@ import mb.statix.search.*;
 public final class IncStrategy<CTX> implements Strategy<Integer, Integer, CTX> {
 
     @Override
-    public Sequence<Integer> apply(CTX ctx, Integer input) {
+    public Sequence<Integer> apply(CTX ctx, Integer input) throws InterruptedException {
         return Sequence.of(input + 1);
     }
 

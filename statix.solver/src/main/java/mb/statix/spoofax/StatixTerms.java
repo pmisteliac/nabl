@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.Ref;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.log.ILogger;
@@ -76,7 +77,7 @@ import mb.statix.solver.query.IQueryMin;
 import mb.statix.solver.query.QueryFilter;
 import mb.statix.solver.query.QueryMin;
 import mb.statix.spec.Rule;
-import mb.statix.spec.Spec;
+
 
 public class StatixTerms {
 

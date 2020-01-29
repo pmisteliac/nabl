@@ -6,7 +6,7 @@ import mb.statix.generator.SearchState;
 import mb.statix.generator.SearchStrategy;
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.spec.Spec;
+
 
 final class Match<I1 extends SearchState, I2 extends SearchState, O extends SearchState>
         extends SearchStrategy<EitherSearchState<I1, I2>, O> {

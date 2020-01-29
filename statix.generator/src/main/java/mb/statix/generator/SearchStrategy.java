@@ -2,7 +2,7 @@ package mb.statix.generator;
 
 import mb.statix.generator.nodes.SearchNode;
 import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.spec.Spec;
+
 
 public abstract class SearchStrategy<I extends SearchState, O extends SearchState> {
 

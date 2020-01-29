@@ -3,14 +3,24 @@ package mb.statix.search.strategies;
 import mb.statix.search.Strategy;
 import mb.statix.search.Sequence;
 
+import java.util.function.Consumer;
+
 
 /**
  * Convenience functions for creating strategies.
  */
 public final class Strategies {
 
+    public static <T, CTX> AsStringStrategy<T, CTX> asString() {
+        return new AsStringStrategy<>();
+    }
+
     public static <T, CTX> CutStrategy<T, CTX> cut(Sequence<?> sequence) {
         return new CutStrategy<>(sequence);
+    }
+
+    public static <T, R, CTX> DebugStrategy<T, R, CTX> debug(Strategy<T, R, CTX> strategy, Consumer<R> action) {
+        return new DebugStrategy<>(strategy, action);
     }
 
     public static <T, CTX> FailStrategy<T, CTX> fail() {
@@ -43,10 +53,6 @@ public final class Strategies {
 
     public static <A, B, C, CTX> SeqStrategy<A, B, C, CTX> seq(Strategy<A, B, CTX> strategy1, Strategy<B, C, CTX> strategy2) {
         return new SeqStrategy<>(strategy1, strategy2);
-    }
-
-    public static <T, CTX> AsStringStrategy<T, CTX> asString() {
-        return new AsStringStrategy<>();
     }
 
 

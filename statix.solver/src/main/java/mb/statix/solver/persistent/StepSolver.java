@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.log.Level;
 
@@ -79,7 +80,6 @@ import mb.statix.solver.store.BaseConstraintStore;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
-import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 
 class StepSolver implements IConstraint.CheckedCases<Optional<StepResult>, SolverException> {
@@ -99,7 +99,7 @@ class StepSolver implements IConstraint.CheckedCases<Optional<StepResult>, Solve
     private final IDebugContext subDebug;
 
     public StepSolver(Spec spec, IState.Immutable state, IConstraint initialConstraint, IsComplete _isComplete,
-            IDebugContext debug) {
+                      IDebugContext debug) {
         this.spec = spec;
         this.state = state;
         this.existentials = null;

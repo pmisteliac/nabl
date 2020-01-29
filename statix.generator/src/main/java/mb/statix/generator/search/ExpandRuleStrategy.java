@@ -34,7 +34,7 @@ public final class ExpandRuleStrategy implements SStrategy {
             if (!(focusedConstraint instanceof CUser)) return Stream.empty();
             CUser focus = (CUser)focusedConstraint;
 
-            final java.util.Set<Rule> rules = context.getUnorderedRules().get(focus.name());
+            final java.util.Set<Rule> rules = context.getSpec().rules().getIndependentRules(focus.name());
             return RuleUtil.applyAll(ss.state(), rules, focus.args(), focus)
                     .stream().map(t -> updateSearchState(focus, t._2(), ss));
         });

@@ -26,51 +26,51 @@ public class RuleUtilTest {
     private final static ILogger logger = LoggerUtils.logger(RuleUtilTest.class);
 
     public static void main(String[] args) {
-        testUnorderedRules1();
-        testUnorderedRules2();
+//        testUnorderedRules1();
+//        testUnorderedRules2();
         testInlineRules1();
         testInlineRules2();
         testInlineRules3();
     }
 
-    private static void testUnorderedRules1() {
-        final ITermVar v1 = B.newVar("", "p-1");
-        final ITermVar v2 = B.newVar("", "p-2");
-        final Pattern p1 = P.newVar(v1);
-        final IConstraint body = Constraints.exists(Arrays.asList(v1), new CEqual(v1, v2));
-        // @formatter:off
-        final List<Rule> rules = Arrays.asList(
-          Rule.of("c", Arrays.asList(P.newInt(1), P.newWld()), body)
-        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newListTail(Arrays.asList(P.newWld()), P.newWld()))), body)
-        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newInt(1))), body)
-        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newWld())), body)
-        );
-        testUnorderedRules(rules);
-    }
-
-    private static void testUnorderedRules2() {
-        final ITermVar v1 = B.newVar("", "p-1");
-        final ITermVar v2 = B.newVar("", "p-2");
-        final Pattern p1 = P.newVar(v1);
-        final Pattern p2 = P.newVar(v2);
-        final IConstraint body = new CTrue();
-        // @formatter:off
-        final List<Rule> rules = Arrays.asList(
-          Rule.of("c", Arrays.asList(p1, P.newAs(v1, P.newInt(1))), body)
-        , Rule.of("c", Arrays.asList(p1, p2), body)
-        );
-        testUnorderedRules(rules);
-    }
-
-    private static void testUnorderedRules(List<Rule> rules) {
-        logger.info("Ordered rules:");
-        rules.forEach(r -> logger.info(" * {}", r));
-
-        // @formatter:on
-        final Set<Rule> newRules = RuleUtil.makeUnordered(rules);
-        logger.info("Unordered rules:");
-        newRules.forEach(r -> logger.info(" * {}", r));
-    }
+//    private static void testUnorderedRules1() {
+//        final ITermVar v1 = B.newVar("", "p-1");
+//        final ITermVar v2 = B.newVar("", "p-2");
+//        final Pattern p1 = P.newVar(v1);
+//        final IConstraint body = Constraints.exists(Arrays.asList(v1), new CEqual(v1, v2));
+//        // @formatter:off
+//        final List<Rule> rules = Arrays.asList(
+//          Rule.of("c", Arrays.asList(P.newInt(1), P.newWld()), body)
+//        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newListTail(Arrays.asList(P.newWld()), P.newWld()))), body)
+//        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newInt(1))), body)
+//        , Rule.of("c", Arrays.asList(p1, P.newAs(v2, P.newWld())), body)
+//        );
+//        testUnorderedRules(rules);
+//    }
+//
+//    private static void testUnorderedRules2() {
+//        final ITermVar v1 = B.newVar("", "p-1");
+//        final ITermVar v2 = B.newVar("", "p-2");
+//        final Pattern p1 = P.newVar(v1);
+//        final Pattern p2 = P.newVar(v2);
+//        final IConstraint body = new CTrue();
+//        // @formatter:off
+//        final List<Rule> rules = Arrays.asList(
+//          Rule.of("c", Arrays.asList(p1, P.newAs(v1, P.newInt(1))), body)
+//        , Rule.of("c", Arrays.asList(p1, p2), body)
+//        );
+//        testUnorderedRules(rules);
+//    }
+//
+//    private static void testUnorderedRules(List<Rule> rules) {
+//        logger.info("Ordered rules:");
+//        rules.forEach(r -> logger.info(" * {}", r));
+//
+//        // @formatter:on
+//        final Set<Rule> newRules = RuleUtil.makeUnordered(rules);
+//        logger.info("Unordered rules:");
+//        newRules.forEach(r -> logger.info(" * {}", r));
+//    }
 
     private static void testInlineRules1() {
         final Pattern p1 = P.newVar("p1");

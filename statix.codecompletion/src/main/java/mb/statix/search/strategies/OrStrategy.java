@@ -17,7 +17,7 @@ public final class OrStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
     }
 
     @Override
-    public Sequence<O> apply(CTX ctx, I input) {
+    public Sequence<O> apply(CTX ctx, I input) throws InterruptedException {
         return this.strategy1.apply(ctx, input).concatWith(this.strategy2.apply(ctx, input));
     }
 

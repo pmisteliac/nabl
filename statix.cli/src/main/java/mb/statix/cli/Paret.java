@@ -11,10 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import mb.nabl2.terms.build.TermVar;
 import mb.statix.generator.search.SStrategy;
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Function1;
-import org.metaborg.util.functions.Predicate1;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 
@@ -40,7 +39,7 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.completeness.CompletenessUtil;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
-import mb.statix.spec.Spec;
+
 
 public class Paret {
 

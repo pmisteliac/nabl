@@ -15,6 +15,7 @@ import mb.statix.solver.query.RelationLabelOrder;
 import mb.statix.spec.Rule;
 import mb.statix.spec.Spec;
 
+
 public class ConstraintQueries implements IConstraintQueries {
 
     final Spec spec;

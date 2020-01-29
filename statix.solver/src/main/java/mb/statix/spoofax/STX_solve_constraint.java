@@ -6,6 +6,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 import java.util.List;
 import java.util.Optional;
 
+import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Function1;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -22,7 +23,7 @@ import mb.statix.solver.log.IDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
-import mb.statix.spec.Spec;
+
 
 public class STX_solve_constraint extends StatixPrimitive {
 

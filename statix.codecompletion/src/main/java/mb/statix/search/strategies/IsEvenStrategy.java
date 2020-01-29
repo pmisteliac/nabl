@@ -9,7 +9,7 @@ import mb.statix.search.*;
 public final class IsEvenStrategy<CTX> implements Strategy<Integer, Integer, CTX> {
 
     @Override
-    public Sequence<Integer> apply(CTX ctx, Integer input) {
+    public Sequence<Integer> apply(CTX ctx, Integer input) throws InterruptedException {
         if (input % 2 == 0) {
             return Sequence.of(input);
         } else {

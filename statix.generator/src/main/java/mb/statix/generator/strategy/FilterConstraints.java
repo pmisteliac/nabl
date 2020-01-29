@@ -13,7 +13,7 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState.Immutable;
 import mb.statix.solver.completeness.Completeness;
 import mb.statix.solver.completeness.ICompleteness;
-import mb.statix.spec.Spec;
+
 
 final class FilterConstraints extends SearchStrategy<SearchState, SearchState> {
 
