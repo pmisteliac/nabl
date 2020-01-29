@@ -21,7 +21,7 @@ import static mb.nabl2.terms.matching.TermPattern.P;
 
 
 /**
- * A set of rules.
+ * An immutable set of rules.
  */
 public final class RuleSet {
 
@@ -33,8 +33,8 @@ public final class RuleSet {
      *
      * @param rules the multimap of rule names to rules, ordered from most specific to least specific guard
      */
-    public RuleSet(ImmutableListMultimap<String, Rule> rules) {
-        this.rules = rules;
+    public RuleSet(ListMultimap<String, Rule> rules) {
+        this.rules = ImmutableListMultimap.copyOf(rules);
     }
 
     /**

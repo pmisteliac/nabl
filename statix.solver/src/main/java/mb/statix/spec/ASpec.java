@@ -39,7 +39,7 @@ public abstract class ASpec {
     @Value.Parameter public abstract SetMultimap<String, Tuple2<Integer, ITerm>> scopeExtensions();
 
     public static Spec of() {
-        return Spec.of(ImmutableListMultimap.of(), ImmutableSet.of(), ImmutableSet.of(), B.EMPTY_TUPLE,
+        return Spec.of(new RuleSet(ImmutableListMultimap.of()), ImmutableSet.of(), ImmutableSet.of(), B.EMPTY_TUPLE,
                 new FiniteAlphabet<>(), ImmutableSetMultimap.of());
     }
 

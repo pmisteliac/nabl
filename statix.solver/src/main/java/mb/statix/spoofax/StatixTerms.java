@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import org.metaborg.util.Ref;
 import org.metaborg.util.iterators.Iterables2;
@@ -96,7 +97,7 @@ public class StatixTerms {
                 (t, edgeLabels, relationLabels, noRelationLabel, rules, ext) -> {
                     final IAlphabet<ITerm> labels = new FiniteAlphabet<>(
                             Iterables2.cons(noRelationLabel, Iterables.concat(relationLabels, edgeLabels)));
-                    return Spec.of(rules, edgeLabels, relationLabels, noRelationLabel, labels, ext);
+                    return Spec.of(new RuleSet(rules), edgeLabels, relationLabels, noRelationLabel, labels, ext);
                 });
     }
 
