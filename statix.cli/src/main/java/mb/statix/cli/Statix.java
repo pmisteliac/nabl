@@ -79,6 +79,12 @@ public class Statix {
         new StatixRepl(this).run(file);
     }
 
+    @Command(name = "complete") public void
+    complete(@Parameters(paramLabel = "FILE", description = "Statix test file to complete") String file)
+            throws MetaborgException, InterruptedException {
+        new StatixComplete(this, this.S, context).run(file);
+    }
+
     private ILanguageImpl loadStxLang() throws MetaborgException {
         ILanguageImpl lang;
         // try loading from path

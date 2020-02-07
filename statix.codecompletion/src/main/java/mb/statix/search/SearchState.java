@@ -17,6 +17,8 @@ import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Spec;
+import org.metaborg.util.log.ILogger;
+import org.metaborg.util.log.LoggerUtils;
 
 import javax.annotation.Nullable;
 
@@ -25,6 +27,8 @@ import javax.annotation.Nullable;
  * The state of the searcher.
  */
 public final class SearchState {
+
+    private final static ILogger log = LoggerUtils.logger(SearchState.class);
 
     /**
      * Creates a new {@link SearchState} from the given specification, solver state, and constraints.
@@ -102,8 +106,14 @@ public final class SearchState {
 //        return Iterables.concat(constraints, delays.keySet());
 //    }
 
+    /**
+     * The variables that have been existentially quantified in the most top-level constraint;
+     * or {@code null} when no constraints have existentially quantified any variables (yet).
+     *
+     * This is used to be able to find the value assigned to the top-most quantified variables.
+     */
     @Nullable public ImmutableMap<ITermVar, ITermVar> getExistentials() {
-        return existentials != null ? existentials : ImmutableMap.of();
+        return this.existentials;
     }
 
     public ICompleteness.Immutable getCompleteness() {
@@ -145,5 +155,54 @@ public final class SearchState {
 
         return new SearchState(applyState, constraints.freeze(), delays.freeze(), this.getExistentials(), completeness.freeze());
     }
+
+    /**
+     * Update the constraints, keeping completeness and delayed constraints in sync.
+     *
+     * This method assumes that no constraints appear in both add and remove, or it will be incorrect!
+     *
+     * @param add the constraints to add
+     * @param remove the constraints to remove
+     * @return the new search state
+     */
+    public SearchState updateConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove) {
+
+        final ICompleteness.Transient completeness = this.completeness.melt();
+        final Set.Transient<IConstraint> constraints = this.constraints.asTransient();
+        final java.util.Set<CriticalEdge> removedEdges = Sets.newHashSet();
+        add.forEach(c -> {
+            if(constraints.__insert(c)) {
+                completeness.add(c, state.unifier());
+            }
+        });
+        remove.forEach(c -> {
+            if(constraints.__remove(c)) {
+                removedEdges.addAll(completeness.remove(c, state.unifier()));
+            }
+        });
+        final Map.Transient<IConstraint, Delay> delays = Map.Transient.of();
+        this.delays.forEach((c, d) -> {
+            if(!Sets.intersection(d.criticalEdges(), removedEdges).isEmpty()) {
+                constraints.__insert(c);
+            } else {
+                delays.__put(c, d);
+            }
+        });
+        return new SearchState(state, constraints.freeze(), delays.freeze(), existentials, completeness.freeze());
+    }
+
+    public SearchState delay(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delay) {
+        final Set.Transient<IConstraint> constraints = this.constraints.asTransient();
+        final Map.Transient<IConstraint, Delay> delays = this.delays.asTransient();
+        delay.forEach(entry -> {
+            if(constraints.__remove(entry.getKey())) {
+                delays.__put(entry.getKey(), entry.getValue());
+            } else {
+                log.warn("delayed constraint not in constraint set: {}", entry.getKey());
+            }
+        });
+        return new SearchState(state, constraints.freeze(), delays.freeze(), existentials, completeness);
+    }
+
 
 }

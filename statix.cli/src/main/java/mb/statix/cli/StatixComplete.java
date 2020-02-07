@@ -55,10 +55,13 @@ public final class StatixComplete {
         final StatixGenerator statixGen = new StatixGenerator(this.spoofax, this.context, resource);
         final Spec spec = statixGen.spec();
 
+        long startTime = System.nanoTime();
         final TermCompleter completer = new TermCompleter(spec);
         log.info("Completing...");
         List<mb.statix.search.SearchState> proposals = completer.complete(statixGen.constraint());
-        log.info("Completed to {} alternatives:", proposals.size());
+        long endTime = System.nanoTime();
+        long elapsedTime = endTime - startTime;
+        log.info("Completed to {} alternatives in {} s:", proposals.size(), String.format("%.3f", elapsedTime / 1000000000.0));
         proposals.forEach(s -> {
             System.out.println(pretty.apply(s));
         });

@@ -1,6 +1,7 @@
 package mb.statix.codecompletion;
 
 import com.google.common.collect.ImmutableList;
+import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
 import mb.statix.search.SearchContext;
 import mb.statix.search.SearchState;
@@ -24,18 +25,17 @@ public final class TermCompleter {
 
     private static Strategy<SearchState, SearchState, SearchContext> completionStrategy =
     // @formatter:off
-        infer();
-//        seq(infer())
-//         .$(limit(1, focus(CUser.class)))
-//         .$(expandRule())
-//         .$(infer())
-//         .$(repeat(seq(limit(1, focus(CResolveQuery.class)))
-//                    .$(expandQuery())
-//                    .$(infer())
-//                    .$(delayStuckQueries())
-//                    .$()
-//         ))
-//         .$();
+        seq(infer())
+         .$(limit(1, focus(CUser.class)))
+         .$(expandRule())
+         .$(infer())
+         .$(repeat(seq(limit(1, focus(CResolveQuery.class)))
+            .$(expandQuery())
+            .$(infer())
+            .$(delayStuckQueries())
+            .$()
+         ))
+         .$();
     // @formatter:on
 
     /**

@@ -30,6 +30,14 @@ public final class Strategies {
         return new DebugStrategy<>(strategy, action);
     }
 
+    public static DelayStuckQueriesStrategy delayStuckQueries() {
+        return new DelayStuckQueriesStrategy();
+    }
+
+    public static ExpandQueryStrategy expandQuery() {
+        return new ExpandQueryStrategy();
+    }
+
     public static ExpandRuleStrategy expandRule() {
         return new ExpandRuleStrategy();
     }
@@ -82,6 +90,10 @@ public final class Strategies {
         return new DebugStrategy<>(strategy, s -> System.out.println(s.toString()));
     }
 
+    public static <T, CTX> RepeatStrategy<T, CTX> repeat(Strategy<T, T, CTX> strategy) {
+        return new RepeatStrategy<>(strategy);
+    }
+
     public static <I, O, CTX> SeqStrategy.Builder<I, O, CTX> seq(Strategy<I, O, CTX> strategy) {
         return new SeqStrategy.Builder<>(strategy);
     }
@@ -92,6 +104,10 @@ public final class Strategies {
 
     public static <A, B, CTX> ShuffleStrategy<A, B, CTX> shuffle(Strategy<A, B, CTX> strategy) {
         return shuffle(new Random(), strategy);
+    }
+
+    public static <T, CTX> TryStrategy<T, CTX> try_(Strategy<T, T, CTX> strategy) {
+        return new TryStrategy<>(strategy);
     }
 
 }

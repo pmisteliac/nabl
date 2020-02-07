@@ -32,14 +32,14 @@ import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
 import mb.statix.spec.Spec;
 
-class ResolveDataWF implements DataWF<ITerm, CEqual> {
+public class ResolveDataWF implements DataWF<ITerm, CEqual> {
     private final Spec spec;
     private final IState.Immutable state;
     private final ICompleteness.Immutable completeness;
     private final Rule dataWf;
     private final IConstraint cause;
 
-    ResolveDataWF(Spec spec, IState.Immutable state, ICompleteness.Immutable completeness, Rule dataWf,
+    public ResolveDataWF(Spec spec, IState.Immutable state, ICompleteness.Immutable completeness, Rule dataWf,
             IConstraint cause) {
         this.spec = spec;
         this.state = state;

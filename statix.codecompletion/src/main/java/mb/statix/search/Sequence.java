@@ -1,12 +1,11 @@
 package mb.statix.search;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static mb.statix.search.SequenceBase.EMPTY_SEQUENCE;
 
@@ -61,7 +60,7 @@ public interface Sequence<T> extends Iterator<T> {
      * @param <T> the type of elements in the sequence
      * @return the new sequence
      */
-    @SafeVarargs    // Safe?
+    @SafeVarargs
     static <T> Sequence<T> of(T... es) {
         if (es.length == 0) return empty();
         return new SequenceBase<T>() {
@@ -102,6 +101,61 @@ public interface Sequence<T> extends Iterator<T> {
             @Override
             protected T doNext() {
                 return iterator.next();
+            }
+        };
+    }
+
+    /**
+     * Returns a range of integers.
+     *
+     * This is an initial operation.
+     *
+     * @param inclusiveStart the start value, inclusive
+     * @param exclusiveEnd the end value, exclusive
+     * @return the sequence of integers
+     */
+    static Sequence<Integer> range(int inclusiveStart, int exclusiveEnd) {
+        return new SequenceBase<Integer>() {
+            private int i = inclusiveStart;
+
+            @Override
+            protected boolean doHasNext() {
+                return i < exclusiveEnd;
+            }
+
+            @Override
+            protected Integer doNext() {
+                int next = i;
+                i += 1;
+                return next;
+            }
+        };
+    }
+
+    /**
+     * Generates a sequence of values from the specified generator function.
+     *
+     * This is an initial operation.
+     *
+     * @param generator the generator function which returns a value; or {@code null} to terminate
+     * @param <T> the type of elements in the sequence
+     * @return the generated sequence
+     */
+    static <T> Sequence<T> generate(Supplier<T> generator) {
+        return new SequenceBase<T>() {
+            private T next = generator.get();
+
+            @Override
+            protected boolean doHasNext() {
+                return next != null;
+            }
+
+            @Override
+            protected T doNext() {
+                if (next == null) throw new NoSuchElementException();
+                T current = next;
+                next = generator.get();
+                return current;
             }
         };
     }
@@ -184,6 +238,42 @@ public interface Sequence<T> extends Iterator<T> {
             protected R doNext() {
                 T next = Sequence.this.next();
                 return f.apply(next);
+            }
+        };
+    }
+
+    /**
+     * Skips the elements of the sequence for which the predicate returns false.
+     *
+     * This is an intermediate operation.
+     *
+     * @param f the function to apply
+     * @return the new sequence
+     */
+    default Sequence<T> filter(Predicate<T> f) {
+        return new SequenceBase<T>() {
+            private T next = getNext();
+
+            @Override
+            protected boolean doHasNext() {
+                return this.next != null;
+            }
+
+            @Override
+            protected T doNext() {
+                T current = this.next;
+                this.next = getNext();
+                return current;
+            }
+
+            private T getNext() {
+                if (!Sequence.this.hasNext()) return null;
+                T next = Sequence.this.next();
+                while (!f.test(next) && Sequence.this.hasNext()) {
+                    next = Sequence.this.next();
+                }
+                if (!Sequence.this.hasNext()) return null;
+                return next;
             }
         };
     }
@@ -297,7 +387,7 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Buffers the input sequence.
      *
-     * This is a terminal operation.
+     * This is a terminal intermediate operation.
      *
      * @return a new sequence
      */
@@ -308,7 +398,7 @@ public interface Sequence<T> extends Iterator<T> {
     /**
      * Applies a function to the buffered sequence.
      *
-     * This is a terminal operation.
+     * This is a terminal intermediate operation.
      *
      * @param f the function to apply
      * @param <R> the type of elements in the resulting sequence
@@ -332,5 +422,73 @@ public interface Sequence<T> extends Iterator<T> {
         }
         return list;
     }
+
+    /**
+     * Produces the powerset of the elements in the sequence.
+     *
+     * This is a terminal intermediate operation.
+     *
+     * @return the powerset
+     */
+    default Sequence<Collection<T>> powersetOf() {
+        final List<T> list = this.toList();
+        final int[] size = {0};
+        return Sequence.generate(() -> size[0]++).take(list.size()).flatMap( s -> new SubsetSequence<>(list, s));
+    }
+
+    /**
+     * Produces the subsets of a specific cardinality of the elements in the sequence.
+     *
+     * This is a terminal intermediate operation.
+     *
+     * @param size the cardinality of the sets to return; must be less than or equal to the size of the set
+     * @return the sequence of sets with the same cardinality
+     */
+    default Sequence<Collection<T>> subsetsOfSize(int size) {
+        return new SubsetSequence<>(Sequence.this.toList(), size);
+    }
+
+//    /**
+//     * Produces the subsets of a specific cardinality of the elements in the sequence.
+//     *
+//     * This is a terminal intermediate operation.
+//     *
+//     * @param size the cardinality of the sets to return; must be less than or equal to the size of the set
+//     * @return the sequence of sets with the same cardinality
+//     */
+//    static Sequence<Set<T>> subsetsOfSize(int size) {
+//        return new SequenceBase<Set<T>>() {
+//            private final List<T> list = Sequence.this.toList();
+//            private BigInteger nextSubset = BigInteger.ONE.shiftLeft(size).subtract(BigInteger.ONE);
+//
+//            @Override
+//            protected boolean doHasNext() {
+//                return nextSubset.bitLength() <= list.size();
+//            }
+//
+//            @Override
+//            protected Set<T> doNext() {
+//                if (!doHasNext()) throw new NoSuchElementException();
+//                Set<T> subset = new Subset<>(list, nextSubset, size);
+//                this.nextSubset = snoob(this.nextSubset);
+//                return subset;
+//            }
+//
+//            /**
+//             * Gets the next higher integer with the same number of bits set.
+//             *
+//             * @param x a value that is not 0
+//             * @return the next higher integer with the same number of bits set
+//             */
+//            private BigInteger snoob(BigInteger x) {
+//                // Inspired by: Hacker's Delight
+//                BigInteger s = x.and(x.negate());           // get the right-most set bit
+//                BigInteger r = x.add(s);                    // get the bit set to the left of the right-most pattern
+//                BigInteger m = x.xor(r);                    // isolate the pattern from the rest
+//                BigInteger a = m.shiftRight(2).divide(s);   // adjust and correct the pattern
+//                return r.or(a);                             // integrate the new pattern
+//            }
+//        };
+//    }
 
 }
