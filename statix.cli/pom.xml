@@ -26,6 +26,11 @@
       <version>${metaborg-version}</version>
     </dependency>
     <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>statix.codecompletion</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
     </dependency>
