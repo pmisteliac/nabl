@@ -1,6 +1,7 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
+import mb.statix.sequences.Sequence;
 
 
 /**

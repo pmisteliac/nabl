@@ -5,7 +5,7 @@ import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
 import mb.statix.search.SearchContext;
 import mb.statix.search.SearchState;
-import mb.statix.search.Sequence;
+import mb.statix.sequences.Sequence;
 import mb.statix.search.Strategy;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;

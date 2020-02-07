@@ -1,4 +1,4 @@
-package mb.statix.search;
+package mb.statix.sequences;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static mb.statix.search.SequenceBase.EMPTY_SEQUENCE;
+import static mb.statix.sequences.SequenceBase.EMPTY_SEQUENCE;
 
 
 /**

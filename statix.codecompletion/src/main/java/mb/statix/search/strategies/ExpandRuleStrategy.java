@@ -3,6 +3,7 @@ package mb.statix.search.strategies;
 import com.google.common.collect.ImmutableSet;
 import mb.statix.constraints.CUser;
 import mb.statix.search.*;
+import mb.statix.sequences.Sequence;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
 

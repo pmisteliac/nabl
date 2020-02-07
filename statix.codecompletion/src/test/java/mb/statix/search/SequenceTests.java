@@ -1,5 +1,6 @@
 package mb.statix.search;
 
+import mb.statix.sequences.Sequence;
 import org.junit.Test;
 
 import java.util.Arrays;

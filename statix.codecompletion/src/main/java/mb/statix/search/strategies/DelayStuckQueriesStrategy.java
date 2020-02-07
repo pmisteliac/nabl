@@ -1,26 +1,17 @@
 package mb.statix.search.strategies;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Range;
-import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ListTerms;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.statix.constraints.CEqual;
-import mb.statix.constraints.CInequal;
 import mb.statix.constraints.CResolveQuery;
-import mb.statix.generator.nodes.SearchNode;
-import mb.statix.generator.nodes.SearchNodes;
 import mb.statix.generator.scopegraph.DataWF;
-import mb.statix.generator.scopegraph.Env;
-import mb.statix.generator.scopegraph.Match;
 import mb.statix.generator.scopegraph.NameResolution;
 import mb.statix.generator.strategy.ResolveDataWF;
 import mb.statix.scopegraph.reference.*;
 import mb.statix.scopegraph.terms.Scope;
 import mb.statix.search.*;
+import mb.statix.sequences.Sequence;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -28,17 +19,9 @@ import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.query.RegExpLabelWF;
 import mb.statix.solver.query.RelationLabelOrder;
 import mb.statix.spec.Spec;
-import mb.statix.spoofax.StatixTerms;
 import org.metaborg.util.functions.Predicate2;
-import org.metaborg.util.iterators.Iterables2;
-import org.metaborg.util.optionals.Optionals;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;

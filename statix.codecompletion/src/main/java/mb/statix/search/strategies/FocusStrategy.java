@@ -1,16 +1,11 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
+import mb.statix.sequences.Sequence;
 import mb.statix.solver.IConstraint;
-import org.apache.commons.math3.distribution.EnumeratedDistribution;
-import org.apache.commons.math3.util.Pair;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**

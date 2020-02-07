@@ -1,7 +1,6 @@
 package mb.statix.search.strategies;
 
-import com.google.common.collect.ImmutableList;
-import mb.statix.search.Sequence;
+import mb.statix.sequences.Sequence;
 import mb.statix.search.Strategy;
 
 

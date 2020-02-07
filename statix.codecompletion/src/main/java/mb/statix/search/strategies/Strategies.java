@@ -1,7 +1,7 @@
 package mb.statix.search.strategies;
 
-import mb.statix.constraints.CUser;
 import mb.statix.search.*;
+import mb.statix.sequences.Sequence;
 import mb.statix.solver.IConstraint;
 
 import java.util.Random;

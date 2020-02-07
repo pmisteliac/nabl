@@ -1,4 +1,4 @@
-package mb.statix.search;
+package mb.statix.sequences;
 
 import java.math.BigInteger;
 import java.util.*;

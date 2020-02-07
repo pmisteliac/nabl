@@ -2,7 +2,7 @@ package mb.statix.search.strategies;
 
 import com.google.common.collect.ImmutableList;
 import mb.statix.search.*;
-import mb.statix.spec.Spec;
+import mb.statix.sequences.Sequence;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,5 +1,8 @@
 package mb.statix.search;
 
+import mb.statix.sequences.Sequence;
+
+
 /**
  * A strategy, which takes an input and produces a list of outputs.
  */
