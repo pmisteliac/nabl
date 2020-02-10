@@ -1,9 +1,7 @@
 package mb.statix.search.strategies;
 
-import mb.statix.search.Strategy;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,22 +11,21 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
- * Tests the {@link IdStrategy} class.
+ * Tests the {@link FailStrategy} class.
  */
-public final class IdStrategyTests {
+public final class FailStrategyTests {
 
     @Test
-    public void returnsInputUnchanged() throws InterruptedException {
+    public void returnsNothing() throws InterruptedException {
         // Arrange
-        String input = "a";
-        IdStrategy<String, Object> str = new IdStrategy<>();
+        FailStrategy<String, Object> str = new FailStrategy<>();
 
         // Act
-        Stream<String> outputStream = str.apply(null, input);
+        Stream<String> outputStream = str.apply(null, "a");
         List<String> outputs = outputStream.collect(Collectors.toList());
 
         // Assert
-        List<String> expected = Collections.singletonList(input);
+        List<String> expected = Collections.emptyList();
         assertEquals(expected, outputs);
     }
 

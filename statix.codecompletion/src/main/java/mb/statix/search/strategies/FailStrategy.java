@@ -1,7 +1,8 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -10,8 +11,8 @@ import mb.statix.sequences.Sequence;
 public final class FailStrategy<T, CTX> implements Strategy<T, T, CTX> {
 
     @Override
-    public Sequence<T> apply(CTX ctx, T input) throws InterruptedException {
-        return Sequence.empty();
+    public Stream<T> apply(CTX ctx, T input) throws InterruptedException {
+        return Stream.empty();
     }
 
     @Override

@@ -2,10 +2,10 @@ package mb.statix.search.strategies;
 
 import com.google.common.collect.ImmutableList;
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -21,8 +21,8 @@ public final class SeqStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Sequence<O> apply(CTX ctx, I input) throws InterruptedException {
-        Sequence<Object> values = Sequence.of(input);
+    public Stream<O> apply(CTX ctx, I input) throws InterruptedException {
+        Stream<Object> values = Stream.of(input);
         for (Strategy strategy : this.strategies) {
             values = values.flatMap(v -> {
                 try {
@@ -33,7 +33,7 @@ public final class SeqStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
                 }
             });
         }
-        return (Sequence<O>)values;
+        return (Stream<O>)values;
     }
 
     @Override

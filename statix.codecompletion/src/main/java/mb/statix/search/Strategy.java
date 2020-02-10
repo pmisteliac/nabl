@@ -1,6 +1,6 @@
 package mb.statix.search;
 
-import mb.statix.sequences.Sequence;
+import java.util.stream.Stream;
 
 
 /**
@@ -17,6 +17,6 @@ public interface Strategy<I, O, CTX> {
      * @return a sequence of results; or an empty sequence when the strategy failed
      * @throws InterruptedException the operation was interrupted
      */
-    Sequence<O> apply(CTX ctx, I input) throws InterruptedException;
+    Stream<O> apply(CTX ctx, I input) throws InterruptedException;
 
 }

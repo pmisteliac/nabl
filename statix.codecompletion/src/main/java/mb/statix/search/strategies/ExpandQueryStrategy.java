@@ -18,7 +18,6 @@ import mb.statix.scopegraph.reference.LabelWF;
 import mb.statix.scopegraph.reference.ResolutionException;
 import mb.statix.scopegraph.terms.Scope;
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
@@ -29,11 +28,11 @@ import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.optionals.Optionals;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
@@ -46,7 +45,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CResolveQuery>, SearchState, SearchContext> {
 
     @Override
-    public Sequence<SearchState> apply(SearchContext ctx, FocusedSearchState<CResolveQuery> input) throws InterruptedException {
+    public Stream<SearchState> apply(SearchContext ctx, FocusedSearchState<CResolveQuery> input) throws InterruptedException {
         final CResolveQuery query = input.getFocus();
 
         final IState.Immutable state = input.getSearchState().getState();
@@ -93,9 +92,7 @@ public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CR
             throw new RuntimeException(e);
         }
 
-        final List<Integer> indices = IntStream.range(0, count.get()).boxed().collect(Collectors.toCollection(ArrayList::new));
-
-        return Sequence.from(indices).flatMap(idx -> {
+        return IntStream.range(0, count.get()).mapToObj(idx -> {
             final AtomicInteger select = new AtomicInteger(idx);
             final Env<Scope, ITerm, ITerm, CEqual> env;
             try {
@@ -118,30 +115,30 @@ public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CR
             final Range<Integer> resultSize = resultSize(query.resultTerm(), unifier, env.matches.size());
 
             // For each possible size:
-            return Sequence.range(resultSize.lowerEndpoint(), resultSize.upperEndpoint() + 1)
-            .flatMap(size -> Sequence.from(optMatches).subsetsOfSize(size).map(matches -> {
-                List<Match<Scope, ITerm, ITerm, CEqual>> rejects =
-                        Sequence.from(optMatches).filter(matches::contains).toList();
+            return IntStream.rangeClosed(resultSize.lowerEndpoint(), resultSize.upperEndpoint())
+                .mapToObj(size -> StreamUtils.subsetsOfSize(optMatches.stream(), size).map(matches -> {
+                    List<Match<Scope, ITerm, ITerm, CEqual>> rejects =
+                            optMatches.stream().filter(matches::contains).collect(Collectors.toList());
 
-                final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
-                reqMatches.forEach(subEnvBuilder::match);
-                matches.forEach(subEnvBuilder::match);
-                rejects.forEach(subEnvBuilder::reject);
-                env.rejects.forEach(subEnvBuilder::reject);
-                final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
+                    final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
+                    reqMatches.forEach(subEnvBuilder::match);
+                    matches.forEach(subEnvBuilder::match);
+                    rejects.forEach(subEnvBuilder::reject);
+                    env.rejects.forEach(subEnvBuilder::reject);
+                    final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
 
-                final List<ITerm> pathTerms = subEnv.matches.stream().map(m -> StatixTerms.explicate(m.path))
-                        .collect(ImmutableList.toImmutableList());
-                final ImmutableList.Builder<IConstraint> constraints = ImmutableList.builder();
-                constraints.add(new CEqual(B.newList(pathTerms), query.resultTerm(), query));
-                subEnv.matches.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(constraints::add);
-                subEnv.rejects.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(condition -> {
-                    constraints.add(new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
-                            condition.cause().orElse(null), condition.message().orElse(null)));
-                });
-                return input.getSearchState().updateConstraints(constraints.build(), Iterables2.singleton(query));
-            }));
-        });
+                    final List<ITerm> pathTerms = subEnv.matches.stream().map(m -> StatixTerms.explicate(m.path))
+                            .collect(ImmutableList.toImmutableList());
+                    final ImmutableList.Builder<IConstraint> constraints = ImmutableList.builder();
+                    constraints.add(new CEqual(B.newList(pathTerms), query.resultTerm(), query));
+                    subEnv.matches.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(constraints::add);
+                    subEnv.rejects.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(condition -> {
+                        constraints.add(new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
+                                condition.cause().orElse(null), condition.message().orElse(null)));
+                    });
+                    return input.getSearchState().updateConstraints(constraints.build(), Iterables2.singleton(query));
+                })).flatMap(stream -> stream);
+        }).flatMap(stream -> stream);
     }
 
     /**

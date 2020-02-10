@@ -1,7 +1,8 @@
 package mb.statix.search.strategies;
 
-import mb.statix.sequences.Sequence;
 import mb.statix.search.Strategy;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -18,8 +19,8 @@ public final class LimitStrategy<A, B, CTX> implements Strategy<A, B, CTX> {
     }
 
     @Override
-    public Sequence<B> apply(CTX ctx, A input) throws InterruptedException {
-        return this.strategy.apply(ctx, input).take(limit);
+    public Stream<B> apply(CTX ctx, A input) throws InterruptedException {
+        return this.strategy.apply(ctx, input).limit(limit);
     }
 
     @Override

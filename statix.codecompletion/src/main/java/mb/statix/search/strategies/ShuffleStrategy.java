@@ -1,10 +1,11 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.RandomUtils;
-import mb.statix.sequences.Sequence;
+import mb.statix.search.StreamUtils;
 import mb.statix.search.Strategy;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -21,8 +22,8 @@ public final class ShuffleStrategy<A, B, CTX> implements Strategy<A, B, CTX> {
     }
 
     @Override
-    public Sequence<B> apply(CTX ctx, A input) throws InterruptedException {
-        return this.strategy.apply(ctx, input).transform(l -> {
+    public Stream<B> apply(CTX ctx, A input) throws InterruptedException {
+        return StreamUtils.transform(this.strategy.apply(ctx, input), l -> {
             List<B> list = new ArrayList<>(l);
             Collections.shuffle(list, this.rng);
             return list;

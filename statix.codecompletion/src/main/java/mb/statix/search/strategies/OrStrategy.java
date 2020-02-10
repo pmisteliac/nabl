@@ -1,7 +1,9 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
+import one.util.streamex.StreamEx;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -18,8 +20,8 @@ public final class OrStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
     }
 
     @Override
-    public Sequence<O> apply(CTX ctx, I input) throws InterruptedException {
-        return this.strategy1.apply(ctx, input).concatWith(this.strategy2.apply(ctx, input));
+    public Stream<O> apply(CTX ctx, I input) throws InterruptedException {
+        return StreamEx.of(this.strategy1.apply(ctx, input)).append(this.strategy2.apply(ctx, input));
     }
 
     @Override

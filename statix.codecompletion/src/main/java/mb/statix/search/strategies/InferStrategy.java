@@ -2,11 +2,12 @@ package mb.statix.search.strategies;
 
 import mb.statix.search.SearchContext;
 import mb.statix.search.SearchState;
-import mb.statix.sequences.Sequence;
 import mb.statix.search.Strategy;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -15,7 +16,7 @@ import mb.statix.solver.persistent.SolverResult;
 public final class InferStrategy implements Strategy<SearchState, SearchState, SearchContext> {
 
     @Override
-    public Sequence<SearchState> apply(SearchContext ctx, SearchState state) throws InterruptedException {
+    public Stream<SearchState> apply(SearchContext ctx, SearchState state) throws InterruptedException {
 
         final SolverResult result = Solver.solve(
                 ctx.getSpec(),
@@ -27,9 +28,9 @@ public final class InferStrategy implements Strategy<SearchState, SearchState, S
         );
 
         if (result.hasErrors()) {
-            return Sequence.empty();
+            return Stream.empty();
         } else {
-            return Sequence.of(SearchState.fromSolverResult(result, state.getExistentials()));
+            return Stream.of(SearchState.fromSolverResult(result, state.getExistentials()));
         }
     }
 

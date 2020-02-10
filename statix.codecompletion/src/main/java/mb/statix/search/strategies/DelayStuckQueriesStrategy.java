@@ -11,7 +11,6 @@ import mb.statix.generator.strategy.ResolveDataWF;
 import mb.statix.scopegraph.reference.*;
 import mb.statix.scopegraph.terms.Scope;
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -22,6 +21,7 @@ import mb.statix.spec.Spec;
 import org.metaborg.util.functions.Predicate2;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
@@ -33,7 +33,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 public final class DelayStuckQueriesStrategy implements Strategy<SearchState, SearchState, SearchContext> {
 
     @Override
-    public Sequence<SearchState> apply(SearchContext ctx, SearchState input) throws InterruptedException {
+    public Stream<SearchState> apply(SearchContext ctx, SearchState input) throws InterruptedException {
         final IState.Immutable state = input.getState();
         final ICompleteness.Immutable completeness = input.getCompleteness();
 
@@ -42,7 +42,7 @@ public final class DelayStuckQueriesStrategy implements Strategy<SearchState, Se
             delays.put(q, d);
         }));
 
-        return Sequence.of(input.delay(delays.entrySet()));
+        return Stream.of(input.delay(delays.entrySet()));
     }
 
     private Optional<Delay> checkDelay(Spec spec, CResolveQuery query, IState.Immutable state, ICompleteness.Immutable completeness) {

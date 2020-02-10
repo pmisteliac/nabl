@@ -1,11 +1,11 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
 import mb.statix.solver.IConstraint;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 /**
@@ -28,16 +28,15 @@ public final class FocusStrategy<C extends IConstraint> implements Strategy<Sear
     }
 
     @Override
-    public Sequence<FocusedSearchState<C>> apply(SearchContext searchContext, SearchState input) throws InterruptedException {
+    public Stream<FocusedSearchState<C>> apply(SearchContext searchContext, SearchState input) throws InterruptedException {
         //noinspection unchecked
         Optional<C> focus = input.getConstraints().stream()
                 .filter(c -> constraintClass.isAssignableFrom(c.getClass()))
                 .map(c -> (C)c)
                 .filter(predicate)
                 .findFirst();
-        if (!focus.isPresent()) { return Sequence.empty(); }
+        return focus.map(c -> Stream.of(new FocusedSearchState<>(input, c))).orElseGet(Stream::empty);
 
-        return Sequence.of(new FocusedSearchState<>(input, focus.get()));
     }
 
     @Override

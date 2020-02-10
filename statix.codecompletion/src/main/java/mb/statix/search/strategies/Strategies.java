@@ -1,7 +1,6 @@
 package mb.statix.search.strategies;
 
 import mb.statix.search.*;
-import mb.statix.sequences.Sequence;
 import mb.statix.solver.IConstraint;
 
 import java.util.Random;
@@ -14,100 +13,145 @@ import java.util.function.Predicate;
  */
 public final class Strategies {
 
-    public static <A, B, C, CTX> AndStrategy<A, B, C, CTX> and(Strategy<A, B, CTX> strategy1, Strategy<B, C, CTX> strategy2) {
-        return new AndStrategy<>(strategy1, strategy2);
+    /**
+     * Performs an action on all results of the given strategy.
+     *
+     * @param s the strategy
+     * @param action the action to perform
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> DebugStrategy<T, R, CTX> debug(Strategy<T, R, CTX> s, Consumer<R> action) {
+        return new DebugStrategy<>(s, action);
     }
 
-    public static <T, CTX> AsStringStrategy<T, CTX> asString() {
-        return new AsStringStrategy<>();
-    }
-
-    public static <T, CTX> CutStrategy<T, CTX> cut(Sequence<?> sequence) {
-        return new CutStrategy<>(sequence);
-    }
-
-    public static <T, R, CTX> DebugStrategy<T, R, CTX> debug(Strategy<T, R, CTX> strategy, Consumer<R> action) {
-        return new DebugStrategy<>(strategy, action);
-    }
-
-    public static DelayStuckQueriesStrategy delayStuckQueries() {
-        return new DelayStuckQueriesStrategy();
-    }
-
-    public static ExpandQueryStrategy expandQuery() {
-        return new ExpandQueryStrategy();
-    }
-
-    public static ExpandRuleStrategy expandRule() {
-        return new ExpandRuleStrategy();
-    }
-
+    /**
+     * Always fails.
+     *
+     * @param <T> the type of inputs and outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
     public static <T, CTX> FailStrategy<T, CTX> fail() {
         return new FailStrategy<>();
     }
 
-    public static <C extends IConstraint> FocusStrategy<C> focus(Class<C> constraintClass, Predicate<C> predicate) {
-        return new FocusStrategy<>(constraintClass, predicate);
-    }
-
-    public static <C extends IConstraint> FocusStrategy<C> focus(Class<C> constraintClass) {
-        return focus(constraintClass, c -> true);
-    }
-
-    public static <A, B, C, CTX> GChoiceStrategy<A, B, C, CTX> gChoice(Strategy<A, B, CTX> tryStrategy, Strategy<B, C, CTX> thenStrategy, Strategy<A, C, CTX> elseStrategy) {
-        return new GChoiceStrategy<>(tryStrategy, thenStrategy, elseStrategy);
-    }
-
+    /**
+     * Identity strategy.
+     *
+     * @param <T> the type of input and outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
     public static <T, CTX> IdStrategy<T, CTX> id() {
         return new IdStrategy<>();
     }
 
-    public static <CTX> IncStrategy<CTX> inc() {
-        return new IncStrategy();
+    /**
+     * Limits the number of results of the given search strategy.
+     *
+     * @param limit the maximum number of results
+     * @param s the strategy
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> LimitStrategy<T, R, CTX> limit(int limit, Strategy<T, R, CTX> s) {
+        return new LimitStrategy<>(limit, s);
     }
 
-    public static InferStrategy infer() {
-        return new InferStrategy();
+    /**
+     * Applies two strategies non-deterministically.
+     *
+     * @param s1 the first strategy
+     * @param s2 the second strategy
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> OrStrategy<T, R, CTX> or(Strategy<T, R, CTX> s1, Strategy<T, R, CTX> s2) {
+        return new OrStrategy<>(s1, s2);
     }
 
-    public static <CTX> IsEvenStrategy<CTX> isEven() {
-        return new IsEvenStrategy<>();
+    /**
+     * Prints all values resulting from the given strategy.
+     *
+     * @param s the strategy
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> DebugStrategy<T, R, CTX> print(Strategy<T, R, CTX> s) {
+        return new DebugStrategy<>(s, v -> System.out.println(v.toString()));
     }
 
-    public static <A, B, CTX> LimitStrategy<A, B, CTX> limit(int limit, Strategy<A, B, CTX> strategy) {
-        return new LimitStrategy<>(limit, strategy);
+    /**
+     * Repeatedly applies a strategy to the results until the strategy fails.
+     *
+     * @param s the strategy
+     * @param <T> the type of input and outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, CTX> RepeatStrategy<T, CTX> repeat(Strategy<T, T, CTX> s) {
+        return new RepeatStrategy<>(s);
     }
 
-    public static <T, CTX> NotStrategy<T, CTX> not(Strategy<T, T, CTX> strategy) {
-        return new NotStrategy<>(strategy);
+    /**
+     * Starts a sequence of strategies to apply.
+     *
+     * @param s the first strategy to apply
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> SeqStrategy.Builder<T, R, CTX> seq(Strategy<T, R, CTX> s) {
+        return new SeqStrategy.Builder<>(s);
     }
 
-    public static <T, R, CTX> OrStrategy<T, R, CTX> or(Strategy<T, R, CTX> strategy1, Strategy<T, R, CTX> strategy2) {
-        return new OrStrategy<>(strategy1, strategy2);
+    /**
+     * Shuffles the results of the given strategy.
+     *
+     * @param rng the random number generator to use
+     * @param s the strategy
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> ShuffleStrategy<T, R, CTX> shuffle(Random rng, Strategy<T, R, CTX> s) {
+        return new ShuffleStrategy<>(rng, s);
     }
 
-    public static <I, O, CTX> DebugStrategy<I, O, CTX> print(Strategy<I, O, CTX> strategy) {
-        return new DebugStrategy<>(strategy, s -> System.out.println(s.toString()));
+    /**
+     * Shuffles the results of the given strategy with a new random number generator.
+     *
+     * @param s the strategy
+     * @param <T> the type of input for the strategy
+     * @param <R> the type of outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, R, CTX> ShuffleStrategy<T, R, CTX> shuffle(Strategy<T, R, CTX> s) {
+        return shuffle(new Random(), s);
     }
 
-    public static <T, CTX> RepeatStrategy<T, CTX> repeat(Strategy<T, T, CTX> strategy) {
-        return new RepeatStrategy<>(strategy);
-    }
-
-    public static <I, O, CTX> SeqStrategy.Builder<I, O, CTX> seq(Strategy<I, O, CTX> strategy) {
-        return new SeqStrategy.Builder<>(strategy);
-    }
-
-    public static <A, B, CTX> ShuffleStrategy<A, B, CTX> shuffle(Random rng, Strategy<A, B, CTX> strategy) {
-        return new ShuffleStrategy<>(rng, strategy);
-    }
-
-    public static <A, B, CTX> ShuffleStrategy<A, B, CTX> shuffle(Strategy<A, B, CTX> strategy) {
-        return shuffle(new Random(), strategy);
-    }
-
-    public static <T, CTX> TryStrategy<T, CTX> try_(Strategy<T, T, CTX> strategy) {
-        return new TryStrategy<>(strategy);
+    /**
+     * Attempts to apply the given strategy on the input.
+     *
+     * @param s the strategy
+     * @param <T> the type of input and outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, CTX> TryStrategy<T, CTX> try_(Strategy<T, T, CTX> s) {
+        return new TryStrategy<>(s);
     }
 
 }

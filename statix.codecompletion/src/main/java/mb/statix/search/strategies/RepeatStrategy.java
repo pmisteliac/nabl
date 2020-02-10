@@ -1,7 +1,10 @@
 package mb.statix.search.strategies;
 
-import mb.statix.sequences.Sequence;
 import mb.statix.search.Strategy;
+
+import java.util.stream.Stream;
+
+import static mb.statix.search.strategies.Strategies.*;
 
 
 /**
@@ -9,24 +12,20 @@ import mb.statix.search.Strategy;
  */
 public final class RepeatStrategy<T, CTX> implements Strategy<T, T, CTX> {
 
-    private final Strategy<T, T, CTX> tryStrategy;
+    private final Strategy<T, T, CTX> s;
 
-    public RepeatStrategy(Strategy<T, T, CTX> tryStrategy) {
-        this.tryStrategy = tryStrategy;
+    public RepeatStrategy(Strategy<T, T, CTX> s) {
+        this.s = s;
     }
 
     @Override
-    public Sequence<T> apply(CTX ctx, T input) throws InterruptedException {
-        Sequence<T> elseBranch = Sequence.of(input);
-        Sequence<T> thenBranch = new AndStrategy<>(this.tryStrategy, new AndStrategy<>(
-                new CutStrategy<>(elseBranch), this)).apply(ctx, input);
-
-        return thenBranch.concatWith(elseBranch);
+    public Stream<T> apply(CTX ctx, T input) throws InterruptedException {
+        return try_(seq(s).$(repeat(s)).$()).apply(ctx, input);
     }
 
     @Override
     public String toString() {
-        return "repeat(" + tryStrategy.toString() + ")";
+        return "repeat(" + s.toString() + ")";
     }
 
 }

@@ -1,9 +1,10 @@
 package mb.statix.search.strategies;
 
-import mb.statix.sequences.Sequence;
+import mb.statix.search.StreamUtils;
 import mb.statix.search.Strategy;
 
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 
 /**
@@ -20,10 +21,10 @@ public final class DebugStrategy<I, O, CTX> implements Strategy<I, O, CTX> {
     }
 
     @Override
-    public Sequence<O> apply(CTX ctx, I input) throws InterruptedException {
-        // Note that buffer() forces evaluation of the sequence.
+    public Stream<O> apply(CTX ctx, I input) throws InterruptedException {
+        // This buffers the entire stream.
         // This has a performance implication, but is required for a better debugging experience.
-        return this.strategy.apply(ctx, input).forEach(this.action).buffer();
+        return StreamUtils.transform(this.strategy.apply(ctx, input), c -> { c.forEach(this.action); return c; });
     }
 
     @Override
