@@ -118,7 +118,7 @@ public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CR
             return IntStream.rangeClosed(resultSize.lowerEndpoint(), resultSize.upperEndpoint())
                 .mapToObj(size -> StreamUtils.subsetsOfSize(optMatches.stream(), size).map(matches -> {
                     List<Match<Scope, ITerm, ITerm, CEqual>> rejects =
-                            optMatches.stream().filter(matches::contains).collect(Collectors.toList());
+                            optMatches.stream().filter(m -> !matches.contains(m)).collect(Collectors.toList());
 
                     final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
                     reqMatches.forEach(subEnvBuilder::match);

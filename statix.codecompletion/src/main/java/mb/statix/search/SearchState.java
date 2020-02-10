@@ -5,7 +5,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
+import mb.nabl2.terms.unification.UnifierFormatter;
+import mb.nabl2.terms.unification.Unifiers;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.CapsuleUtil;
 import mb.statix.scopegraph.reference.CriticalEdge;
@@ -17,6 +20,8 @@ import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Spec;
+import org.metaborg.util.functions.Action1;
+import org.metaborg.util.functions.Function2;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 
@@ -202,6 +207,35 @@ public final class SearchState {
             }
         });
         return new SearchState(state, constraints.freeze(), delays.freeze(), existentials, completeness);
+    }
+
+    @Override public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(ln -> {
+            sb.append(ln).append("\n");
+        }, (t, u) -> new UnifierFormatter(u, 2).format(t));
+        return sb.toString();
+    }
+
+    private void print(Action1<String> printLn, Function2<ITerm, IUniDisunifier, String> pp) {
+        final IUniDisunifier unifier = state.unifier();
+        printLn.apply("SearchState");
+        printLn.apply("| vars:");
+        for(Map.Entry<ITermVar, ITermVar> existential : existentials.entrySet()) {
+            String var = pp.apply(existential.getKey(), Unifiers.Immutable.of());
+            String term = pp.apply(existential.getValue(), unifier);
+            printLn.apply("|   " + var + " : " + term);
+        }
+        printLn.apply("| unifier: " + state.unifier().toString());
+        printLn.apply("| completeness: " + completeness.toString());
+        printLn.apply("| constraints:");
+        for(IConstraint c : constraints) {
+            printLn.apply("|   " + c.toString(t -> pp.apply(t, unifier)));
+        }
+        printLn.apply("| delays:");
+        for(java.util.Map.Entry<IConstraint, Delay> e : delays.entrySet()) {
+            printLn.apply("|   " + e.getValue() + " : " + e.getKey().toString(t -> pp.apply(t, unifier)));
+        }
     }
 
 

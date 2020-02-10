@@ -82,7 +82,7 @@ public class Statix {
     @Command(name = "complete") public void
     complete(@Parameters(paramLabel = "FILE", description = "Statix test file to complete") String file)
             throws MetaborgException, InterruptedException {
-        new StatixComplete(this, this.S, context).run(file);
+        new StatixComplete2(this, this.S, context).run(file);
     }
 
     private ILanguageImpl loadStxLang() throws MetaborgException {

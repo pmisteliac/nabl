@@ -72,4 +72,12 @@ public final class SearchStrategies {
         return new InferStrategy();
     }
 
+    /**
+     * Unfocuses.
+     *
+     * @return the resulting strategy
+     */
+    public static <C extends IConstraint> UnfocusStrategy<C> unfocus() {
+        return new UnfocusStrategy<>();
+    }
 }
