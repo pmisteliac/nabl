@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 
 /**
  * Performs inference on the search state.
+ *
+ * NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
  */
 public final class InferStrategy implements Strategy<SearchState, SearchState, SearchContext> {
 
@@ -29,11 +31,7 @@ public final class InferStrategy implements Strategy<SearchState, SearchState, S
 
         // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
 
-//        if (result.hasErrors()) {
-//            return Stream.empty();
-//        } else {
-            return Stream.of(SearchState.fromSolverResult(result, state.getExistentials()));
-//        }
+        return Stream.of(SearchState.fromSolverResult(result, state.getExistentials()));
     }
 
     @Override

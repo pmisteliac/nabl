@@ -41,7 +41,7 @@ public final class CompleteTest {
      * @param completer
      * @throws InterruptedException
      */
-    private void assertCanComplete(Spec spec, String ruleName, IStrategoTerm completeAst, IStrategoTerm incompleteAst, TermCompleter2 completer) throws InterruptedException {
+    private void assertCanComplete(Spec spec, String ruleName, IStrategoTerm completeAst, IStrategoTerm incompleteAst, TermCompleter completer) throws InterruptedException {
         // Preparation: get the search state of the incomplete program
         SearchContext ctx = new SearchContext(spec);
         @Nullable SearchState state = analyze(spec, "", incompleteAst, ruleName, ctx);

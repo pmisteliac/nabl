@@ -1,11 +1,13 @@
 package mb.statix.cli;
 
+import com.google.common.collect.ImmutableList;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ITermVar;
 import mb.nabl2.util.TermFormatter;
+import mb.statix.codecompletion.CompletionProposal;
 import mb.statix.codecompletion.TermCompleter;
-import mb.statix.generator.SearchState;
-import mb.statix.generator.nodes.SearchNode;
+import mb.statix.search.SearchContext;
+import mb.statix.search.SearchState;
+import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
@@ -18,9 +20,9 @@ import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static mb.nabl2.terms.build.TermBuild.B;
+import static mb.statix.search.strategies.SearchStrategies.infer;
 
 
 public final class StatixComplete {
@@ -40,27 +42,43 @@ public final class StatixComplete {
     public void run(String file) throws MetaborgException, InterruptedException {
         log.info("Reading " + file + "...");
         final FileObject resource = this.spoofax.resolve(file);
-        Function1<SearchState, String> pretty = getSearchStatePrinter(resource);
+        Function1<ITerm, String> pretty = getSearchStatePrinter(resource);
 
         final StatixGenerator statixGen = new StatixGenerator(this.spoofax, this.context, resource);
         final Spec spec = statixGen.spec();
+        SearchContext ctx = new SearchContext(spec);
+        log.info("Preparing...");
+        SearchState startState = SearchState.of(spec, State.of(spec), ImmutableList.of(statixGen.constraint()));
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        SearchState completionStartState = infer().apply(ctx, startState).findFirst().get();
+        if (completionStartState.hasErrors()) {
+            log.error("Input program validation failed. Aborted.\n" + completionStartState.toString());
+            return;
+        }
+        if (completionStartState.getConstraints().isEmpty()) {
+            log.error("No constraints left, nothing to complete. Aborted.\n" + completionStartState.toString());
+            return;
+        }
+        log.info("Ready.");
 
-        long startTime = System.nanoTime();
-        final TermCompleter completer = new TermCompleter(spec);
-        log.info("Completing...");
-        List<SearchNode<SearchState>> nodes = completer.completeNodes(statixGen.constraint()).nodes().collect(Collectors.toList());
-
-        long endTime = System.nanoTime();
-        long elapsedTime = endTime - startTime;
-        log.info("Completed to {} alternatives in {} s:", nodes.size(), String.format("%.3f", elapsedTime / 1000000000.0));
-        nodes.forEach(n -> {
-            System.out.println("* " + n.desc());
-            System.out.println("  " + pretty.apply(n.output()));
-        });
-        log.info("Done.");
+        try {
+            final TermCompleter completer = new TermCompleter();
+            log.info("Completing...");
+            long startTime = System.nanoTime();
+            List<CompletionProposal> proposals = completer.complete(ctx, completionStartState, "e");
+            long endTime = System.nanoTime();
+            long elapsedTime = endTime - startTime;
+            log.info("Completed to {} alternatives in {} s:", proposals.size(), String.format("%.3f", elapsedTime / 1000000000.0));
+            proposals.forEach(p -> {
+                System.out.println(pretty.apply(p.getTerm()));
+            });
+            log.info("Done.");
+        } catch (RuntimeException e) {
+            log.error("Completion failed: " + e.getMessage());
+        }
     }
 
-    private Function1<SearchState, String> getSearchStatePrinter(FileObject resource) {
+    private Function1<ITerm, String> getSearchStatePrinter(FileObject resource) {
         TermFormatter tf = ITerm::toString;
         try {
             final ILanguageImpl lang = STX.cli.loadLanguage(STX.project.location());
@@ -69,17 +87,7 @@ public final class StatixComplete {
         } catch(MetaborgException e) {
             // ignore
         }
-        final TermFormatter _tf = tf;
-        return (s) -> _tf.format(project("e", s));
-    }
-
-    private static ITerm project(String varName, SearchState s) {
-        final ITermVar v = B.newVar("", varName);
-        if(s.existentials() != null && s.existentials().containsKey(v)) {
-            return s.state().unifier().findRecursive(s.existentials().get(v));
-        } else {
-            return v;
-        }
+        return tf::format;
     }
 
 }

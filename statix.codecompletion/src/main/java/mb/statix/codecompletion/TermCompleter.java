@@ -1,41 +1,41 @@
 package mb.statix.codecompletion;
 
-import com.google.common.collect.ImmutableList;
+import mb.nabl2.terms.ITerm;
+import mb.nabl2.terms.ITermVar;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
-import mb.statix.generator.DefaultSearchContext;
-import mb.statix.generator.SearchContext;
-import mb.statix.generator.SearchState;
-import mb.statix.generator.SearchStrategy;
-import mb.statix.generator.nodes.SearchNode;
-import mb.statix.generator.nodes.SearchNodes;
-import mb.statix.solver.IConstraint;
-import mb.statix.solver.persistent.State;
-import mb.statix.spec.Spec;
+import mb.statix.search.SearchContext;
+import mb.statix.search.SearchState;
+import mb.statix.search.Strategy;
+import mb.statix.search.strategies.Strategies;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static mb.statix.generator.strategy.SearchStrategies.*;
+import static mb.nabl2.terms.build.TermBuild.B;
+import static mb.statix.search.strategies.SearchStrategies.*;
+import static mb.statix.search.strategies.Strategies.*;
+
 
 /**
  * The term completer.
  */
 public final class TermCompleter {
 
-    /** The Statix specification. */
-    private final Spec spec;
-
-    private static SearchStrategy<SearchState, SearchState> completionStrategy =
+    private static Strategy<SearchState, SearchState, SearchContext> completionStrategy =
     // @formatter:off
-        seq(infer())
-         .$(limit(1, select(CUser.class)))
-         .$(expand())
-         .$(infer())
-         .$(delayStuckQueries())
-         .$(fix2(seq(limit(1, select(CResolveQuery.class)))
-            .$(resolve())
+        seq(print(Strategies.<SearchState, SearchContext>id()))
+         .$(seq(debug(limit(1, focus(CUser.class)), s -> System.out.println("Focused on: " + s)))
+             .$(expandRule())
+             .$(infer())
+             .$(isSuccessful())
+             .$(delayStuckQueries())
+             .$())
+         .$(repeat(seq(limit(1, focus(CResolveQuery.class)))
+            .$(expandQuery())
             .$(infer())
+            .$(isSuccessful())
             .$(delayStuckQueries())
             .$()
          ))
@@ -44,34 +44,40 @@ public final class TermCompleter {
 
     /**
      * Initializes a new instance of the {@link TermCompleter} class.
-     *
-     * @param spec the Statix specification
      */
-    public TermCompleter(Spec spec) {
-        this.spec = spec;
+    public TermCompleter() {
+
     }
 
     /**
      * Completes the specified constraint.
      *
-     * @param constraint the constraint to complete
-     * @return the resulting states
+     * @param ctx the search context
+     * @param state the initial search state
+     * @param placeholderName the name of the placeholder to complete
+     * @return the resulting completion proposals
      */
-    public List<SearchState> complete(IConstraint constraint) {
-        return completeNodes(constraint).nodes().map(SearchNode::output).collect(Collectors.toList());
+    public List<CompletionProposal> complete(SearchContext ctx, SearchState state, String placeholderName) throws InterruptedException {
+        return completeNodes(ctx, state).map(s -> new CompletionProposal(project(placeholderName, s))).collect(Collectors.toList());
     }
 
     /**
      * Completes the specified constraint.
      *
-     * @param constraint the constraint to complete
+     * @param ctx the search context
+     * @param state the initial search state
      * @return the resulting states
      */
-    public SearchNodes<SearchState> completeNodes(IConstraint constraint) {
-        SearchContext ctx = new DefaultSearchContext(this.spec);
-        SearchState initialState = SearchState.of(this.spec, State.of(this.spec), ImmutableList.of(constraint));
-        SearchNode<SearchState> initialNode = new SearchNode<>(ctx.nextNodeId(), initialState, null, "init");
-        return completionStrategy.apply(ctx, initialNode);
+    public Stream<SearchState> completeNodes(SearchContext ctx, SearchState state) throws InterruptedException {
+        return completionStrategy.apply(ctx, state);
     }
 
+    private static ITerm project(String varName, SearchState s) {
+        final ITermVar v = B.newVar("", varName);
+        if(s.getExistentials() != null && s.getExistentials().containsKey(v)) {
+            return s.getState().unifier().findRecursive(s.getExistentials().get(v));
+        } else {
+            return v;
+        }
+    }
 }
