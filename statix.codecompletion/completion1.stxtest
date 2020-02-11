@@ -1,13 +1,13 @@
 resolve {s e T e1 e2}
 
-//	new s, typeOf(s, Let([
-//		Bind("b", BOOL(), True()),
-//		Bind("f", FUN([e, INT(), INT()], INT()), Fun([
-//			Param("a", INT()),
-//			Param("b", INT()),
-//			Param("c", INT())
-//		], Plus(Var("a"), Var("c"))))
-//	], Zero())) == BOOL()
+	new s, typeOf(s, Let([
+		Bind("b", BOOL(), True()),
+		Bind("f", FUN([FLOAT(), INT(), INT()], INT()), Fun([
+			Param("a", FLOAT()),
+			Param("b", INT()),
+			Param("c", INT())
+		], Var("c")))
+	], Call("f", [e, Zero(), Zero()]))) == T
 
 //	new s, typeOf(s, Let([
 //		Bind("b", BOOL(), True()),
@@ -18,14 +18,15 @@ resolve {s e T e1 e2}
 //		], Var("a")))
 //	], Plus(e2, e))) == T
 
-	new s, typeOf(s, Let([
-		Bind("b", BOOL(), True()),
-		Bind("f", FUN([BOOL(), INT(), BOOL()], BOOL()), Fun([
-			Param("a", BOOL()),
-			Param("b", INT()),
-			Param("c", BOOL())
-		], Var("a")))
-	], e)) == T
+//	new s, typeOf(s, Let([
+//		Bind("b", BOOL(), True()),
+//		Bind("f", FUN([BOOL(), INT(), BOOL()], BOOL()), Fun([
+//			Param("a", BOOL()),
+//			Param("b", INT()),
+//			Param("c", BOOL())
+//		], Var("a")))
+//	], e)) == BOOL()
+	
 
 //	new s, typeOf(s, Let([
 //		Bind("b", BOOL(), True())
@@ -56,6 +57,7 @@ signature
         Fun  : list(Param) * Exp -> Exp         //      | fun ($x$ : $T$) { $e$ }
 //        App  : Exp * list(Exp) -> Exp           //      | $e$($e*$)
         Call : ID * list(Exp) -> Exp            //      | $x$($e*$)
+        Coerce : Exp * Type -> Exp
 
 	sorts Param constructors      				// $p$ :=
 		Param : ID * Type -> Param				// 		| $x$ : $T$
@@ -85,13 +87,19 @@ rules
 
     typeOf : scope * Exp -> Type
 
+	subtype : Type * Type
+	subtype(INT(), FLOAT()).
+	subtype(INT(), INT()).
+	subtype(FLOAT(), FLOAT()).
+	
+
   	typeOf(_, True()) = BOOL().
   	
   	typeOf(_, Zero()) = INT().
   	
   	typeOf(_, ZeroFloat()) = FLOAT().
   	
-  	typeOf(_, OneFloat()) = FLOAT().
+//  	typeOf(_, OneFloat()) = FLOAT().
   	
   	typeOf(s, And(x, y)) = BOOL() :-
   		typeOf(s, x) == BOOL(),
@@ -105,8 +113,7 @@ rules
     	new s_let, s_let -P-> s,
     	bindsOk(s, binds, s_let),
     	typeOf(s_let, e) == T,
-    	binds != [], // additive
-    	T != BOOL().
+    	binds != []. // additive
     	
   	typeOf(s, Var(x)) = T :- {p d}
     	typeOfDecl of Var{x@x} in s |-> [(p, (d, T))].
@@ -121,6 +128,9 @@ rules
 //		typesOf(s, es) == AT,
 //		AT == PT.
 
+	typeOf(s, Coerce(e, T)) = T :- {T2}
+		typeOf(s, e) == T2.
+
 	typeOf(s, Call(x, es)) = T :- {FT PT AT p d}
 		typeOfDecl of Var{x@x} in s |-> [(p, (d, FT))],
 		FT == FUN(PT, T),
@@ -128,7 +138,7 @@ rules
 		
 	typesOk : scope * list(Exp) * list(Type)
 	typesOk(s, [], []).
-	typesOk(s, [e|es], [t|ts]) :- typeOf(s, e) == t, typesOk(s, es, ts).
+	typesOk(s, [e|es], [t|ts]) :- subtype(typeOf(s, e), t), typesOk(s, es, ts).
 		
 	typesOf maps typeOf(*, list(*)) = list(*)
 

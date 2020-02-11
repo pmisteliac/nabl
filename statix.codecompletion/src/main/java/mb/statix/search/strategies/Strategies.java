@@ -91,6 +91,17 @@ public final class Strategies {
     }
 
     /**
+     * Prints the value.
+     *
+     * @param <T> the type of input and outputs for the strategy
+     * @param <CTX> the context of the strategy
+     * @return the resulting strategy
+     */
+    public static <T, CTX> DebugStrategy<T, T, CTX> print() {
+        return print(id());
+    }
+
+    /**
      * Repeatedly applies a strategy to the results until the strategy fails.
      *
      * @param s the strategy

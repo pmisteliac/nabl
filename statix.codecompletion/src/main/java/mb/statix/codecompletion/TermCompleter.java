@@ -39,6 +39,7 @@ public final class TermCompleter {
             .$(delayStuckQueries())
             .$()
          ))
+         .$(print())
          .$();
     // @formatter:on
 
@@ -46,7 +47,6 @@ public final class TermCompleter {
      * Initializes a new instance of the {@link TermCompleter} class.
      */
     public TermCompleter() {
-
     }
 
     /**
