@@ -51,9 +51,11 @@ public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CR
         final IState.Immutable state = input.getSearchState().getState();
         final IUniDisunifier unifier = state.unifier();
 
+        // Find the scope
         final Scope scope = Scope.matcher().match(query.scopeTerm(), unifier).orElse(null);
         if(scope == null) throw new IllegalArgumentException("cannot resolve query: no scope");
 
+        // Determine data equivalence (either: true, false, or null when it could not be determined)
         final Boolean isAlways;
         try {
             isAlways = query.min().getDataEquiv().isAlways(ctx.getSpec()).orElse(null);
@@ -92,6 +94,7 @@ public final class ExpandQueryStrategy implements Strategy<FocusedSearchState<CR
             throw new RuntimeException(e);
         }
 
+        // For each declaration:
         return IntStream.range(0, count.get()).mapToObj(idx -> {
             final AtomicInteger select = new AtomicInteger(idx);
             final Env<Scope, ITerm, ITerm, CEqual> env;

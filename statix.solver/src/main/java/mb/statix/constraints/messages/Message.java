@@ -37,10 +37,6 @@ public class Message implements IMessage, Serializable {
         return kind;
     }
 
-    @Override public String toString(TermFormatter formatter) {
-        return content.stream().map(p -> p.toString(formatter)).collect(Collectors.joining());
-    }
-
     @Override public Optional<ITerm> origin() {
         return Optional.ofNullable(origin);
     }
@@ -58,12 +54,15 @@ public class Message implements IMessage, Serializable {
         final ITerm newOrigin = origin != null ? subst.apply(origin) : null;
         return new Message(kind, newContent, newOrigin);
     }
-
     @Override public String toString() {
+        return toString(ITerm::toString);
+    }
+
+    @Override public String toString(TermFormatter formatter) {
         final StringBuilder sb = new StringBuilder();
         sb.append(kind);
         sb.append(" $[");
-        content.forEach(sb::append);
+        content.forEach(c -> sb.append(c.toString(formatter)));
         sb.append("]");
         return sb.toString();
     }

@@ -2,9 +2,8 @@ package mb.statix.cli;
 
 import com.google.common.collect.ImmutableList;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ITermVar;
 import mb.nabl2.util.TermFormatter;
-import mb.statix.codecompletion.TermCompleter;
+import mb.statix.codecompletion.CompletionProposal;
 import mb.statix.codecompletion.TermCompleter2;
 import mb.statix.search.SearchContext;
 import mb.statix.search.SearchState;
@@ -21,9 +20,9 @@ import org.metaborg.util.functions.Function1;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.statix.search.strategies.SearchStrategies.infer;
@@ -51,22 +50,30 @@ public final class StatixComplete2 {
         final StatixGenerator statixGen = new StatixGenerator(this.spoofax, this.context, resource);
         final Spec spec = statixGen.spec();
         SearchContext ctx = new SearchContext(spec);
-        SearchState state = prepare(ctx, spec, statixGen.constraint());
-        if (state == null) {
-            log.error("Aborted.");
+        log.info("Preparing...");
+        SearchState startState = SearchState.of(spec, State.of(spec), ImmutableList.of(statixGen.constraint()));
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        SearchState completionStartState = infer().apply(ctx, startState).findFirst().get();
+        if (completionStartState.hasErrors()) {
+            log.error("Input program validation failed. Aborted.\n" + completionStartState.toString());
             return;
         }
+        if (completionStartState.getConstraints().isEmpty()) {
+            log.error("No constraints left, nothing to complete. Aborted.\n" + completionStartState.toString());
+            return;
+        }
+        log.info("Ready.");
 
-        long startTime = System.nanoTime();
         try {
-            final TermCompleter2 completer = new TermCompleter2(spec);
+            final TermCompleter2 completer = new TermCompleter2();
             log.info("Completing...");
-            List<ITerm> proposals = completer.complete(ctx, state, "e");
+            long startTime = System.nanoTime();
+            List<CompletionProposal> proposals = completer.complete(ctx, completionStartState, "e");
             long endTime = System.nanoTime();
             long elapsedTime = endTime - startTime;
             log.info("Completed to {} alternatives in {} s:", proposals.size(), String.format("%.3f", elapsedTime / 1000000000.0));
-            proposals.forEach(t -> {
-                System.out.println(pretty.apply(t));
+            proposals.forEach(p -> {
+                System.out.println(pretty.apply(p.getTerm()));
             });
             log.info("Done.");
         } catch (RuntimeException e) {
@@ -86,52 +93,23 @@ public final class StatixComplete2 {
         return tf::format;
     }
 
-//    private Function1<SearchState, String> getSearchStatePrinter(FileObject resource) {
-//        TermFormatter tf = ITerm::toString;
-//        try {
-//            final ILanguageImpl lang = STX.cli.loadLanguage(STX.project.location());
-//            final IContext context = STX.S.contextService.get(resource, STX.project, lang);
-//            tf = StatixGenerator.pretty(STX.S, context, "pp-generated");
-//        } catch(MetaborgException e) {
-//            // ignore
-//        }
-//        final TermFormatter _tf = tf;
-//        return (s) -> _tf.format(project("e", s));
+//    /**
+//     * Performs inference on the input.
+//     * This must succeed or the original input constraint is not valid.
+//     *
+//     * Note that in the final implementation the initial state is provided by Statix,
+//     * after doing a normal analysis of the input file. For now, here we have to do
+//     * this manually. We do it here to avoid counting it toward the solving time.
+//     *
+//     * @param context the search context
+//     * @param spec the specification
+//     * @param initialState the initial state
+//     * @return the resulting search state, from which completion may commence;
+//     * or {@code null} when preparation failed
+//     */
+//    @Nullable
+//    private SearchState prepare(SearchContext context, Spec spec, SearchState initialState) throws InterruptedException {
+//        return infer().apply(context, initialState).findFirst().orElse(null);
 //    }
-
-//    private static ITerm project(String varName, SearchState s) {
-//        final ITermVar v = B.newVar("", varName);
-//        if(s.getExistentials() != null && s.getExistentials().containsKey(v)) {
-//            return s.getState().unifier().findRecursive(s.getExistentials().get(v));
-//        } else {
-//            return v;
-//        }
-//    }
-
-
-    /**
-     * Performs inference on the input.
-     * This must succeed or the original input constraint is not valid.
-     *
-     * Note that in the final implementation the initial state is provided by Statix,
-     * after doing a normal analysis of the input file. For now, here we have to do
-     * this manually. We do it here to avoid counting it toward the solving time.
-     *
-     * @param context the search context
-     * @param spec the specification
-     * @param constraint the input constraint
-     * @return the resulting search state, from which completion may commence
-     */
-    private SearchState prepare(SearchContext context, Spec spec, IConstraint constraint) throws InterruptedException {
-        log.info("Preparing...");
-        SearchState initialState = SearchState.of(spec, State.of(spec), ImmutableList.of(constraint));
-        Optional<SearchState> state = infer().apply(context, initialState).findFirst();
-        if (!state.isPresent()) {
-            log.error("Input program validation failed.");
-            return null;
-        }
-        log.info("Ready.");
-        return state.get();
-    }
 
 }

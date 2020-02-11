@@ -11,6 +11,8 @@ import mb.nabl2.terms.unification.UnifierFormatter;
 import mb.nabl2.terms.unification.Unifiers;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.nabl2.util.CapsuleUtil;
+import mb.statix.constraints.messages.IMessage;
+import mb.statix.constraints.messages.MessageKind;
 import mb.statix.scopegraph.reference.CriticalEdge;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
@@ -26,6 +28,10 @@ import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 
 
 /**
@@ -46,7 +52,8 @@ public final class SearchState {
     public static SearchState of(Spec spec, IState.Immutable state, Iterable<? extends IConstraint> constraints) {
         final ICompleteness.Transient completeness = Completeness.Transient.of(spec);
         completeness.addAll(constraints, state.unifier());
-        return new SearchState(state, CapsuleUtil.toSet(constraints), Map.Immutable.of(),
+
+        return new SearchState(state, Map.Immutable.of(), CapsuleUtil.toSet(constraints), Map.Immutable.of(),
                 null, completeness.freeze());
     }
 
@@ -70,22 +77,25 @@ public final class SearchState {
 
         final ImmutableMap<ITermVar, ITermVar> newExistentials =
                 existentials == null ? result.existentials() : existentials;
-        return new SearchState(result.state(), constraints.freeze(), delays.freeze(), newExistentials,
+        return new SearchState(result.state(), CapsuleUtil.toMap(result.messages()), constraints.freeze(), delays.freeze(), newExistentials,
                 result.completeness());
     }
 
-    protected final IState.Immutable state;
-    protected final Set.Immutable<IConstraint> constraints;
-    protected final Map.Immutable<IConstraint, Delay> delays;
-    @Nullable protected final ImmutableMap<ITermVar, ITermVar> existentials;
-    protected final ICompleteness.Immutable completeness;
+    private final IState.Immutable state;
+    private final Set.Immutable<IConstraint> constraints;
+    private final Map.Immutable<IConstraint, Delay> delays;
+    @Nullable private final ImmutableMap<ITermVar, ITermVar> existentials;
+    private final ICompleteness.Immutable completeness;
+    private final Map.Immutable<IConstraint, IMessage> messages;
 
     protected SearchState(IState.Immutable state,
+                          Map.Immutable<IConstraint, IMessage> messages,
                           Set.Immutable<IConstraint> constraints,
                           Map.Immutable<IConstraint, Delay> delays,
                           @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
                           ICompleteness.Immutable completeness) {
         this.state = state;
+        this.messages = messages;
         this.constraints = constraints;
         this.delays = delays;
         this.existentials = existentials;
@@ -95,6 +105,16 @@ public final class SearchState {
     /** Gets the solver state. */
     public IState.Immutable getState() {
         return state;
+    }
+
+    /** Gets the messages. */
+    public Map.Immutable<IConstraint, IMessage> getMessages() {
+        return this.messages;
+    }
+
+    /** Determines whether any of the messages in this state are error messages. */
+    public boolean hasErrors() {
+        return this.messages.values().stream().anyMatch(m -> m.kind().equals(MessageKind.ERROR));
     }
 
     /** The constraints left to solve. */
@@ -158,7 +178,7 @@ public final class SearchState {
             }
         });
 
-        return new SearchState(applyState, constraints.freeze(), delays.freeze(), this.getExistentials(), completeness.freeze());
+        return new SearchState(applyState, messages, constraints.freeze(), delays.freeze(), existentials, completeness.freeze());
     }
 
     /**
@@ -193,7 +213,7 @@ public final class SearchState {
                 delays.__put(c, d);
             }
         });
-        return new SearchState(state, constraints.freeze(), delays.freeze(), existentials, completeness.freeze());
+        return new SearchState(state, messages, constraints.freeze(), delays.freeze(), existentials, completeness.freeze());
     }
 
     public SearchState delay(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delay) {
@@ -206,37 +226,48 @@ public final class SearchState {
                 log.warn("delayed constraint not in constraint set: {}", entry.getKey());
             }
         });
-        return new SearchState(state, constraints.freeze(), delays.freeze(), existentials, completeness);
+        return new SearchState(state, messages, constraints.freeze(), delays.freeze(), existentials, completeness);
     }
 
     @Override public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(ln -> {
-            sb.append(ln).append("\n");
-        }, (t, u) -> new UnifierFormatter(u, 2).format(t));
-        return sb.toString();
+        StringWriter out = new StringWriter();
+        PrintWriter writer = new PrintWriter(out);
+        try {
+            writer.println("SearchState:");
+            write(writer, (t, u) -> new UnifierFormatter(u, 2).format(t));
+        } catch (IOException e) {
+            // This can never happen.
+            throw new RuntimeException(e);
+        }
+        return out.toString();
     }
 
-    private void print(Action1<String> printLn, Function2<ITerm, IUniDisunifier, String> pp) {
+    public void write(PrintWriter writer, Function2<ITerm, IUniDisunifier, String> prettyprinter) throws IOException {
         final IUniDisunifier unifier = state.unifier();
-        printLn.apply("SearchState");
-        printLn.apply("| vars:");
-        for(Map.Entry<ITermVar, ITermVar> existential : existentials.entrySet()) {
-            String var = pp.apply(existential.getKey(), Unifiers.Immutable.of());
-            String term = pp.apply(existential.getValue(), unifier);
-            printLn.apply("|   " + var + " : " + term);
+        if (existentials != null) {
+            writer.println("| vars:");
+            for (Map.Entry<ITermVar, ITermVar> existential : existentials.entrySet()) {
+                String var = prettyprinter.apply(existential.getKey(), Unifiers.Immutable.of());
+                String term = prettyprinter.apply(existential.getValue(), unifier);
+                writer.println("|   " + var + " : " + term);
+            }
+        } else {
+            writer.println("| vars: <null>");
         }
-        printLn.apply("| unifier: " + state.unifier().toString());
-        printLn.apply("| completeness: " + completeness.toString());
-        printLn.apply("| constraints:");
-        for(IConstraint c : constraints) {
-            printLn.apply("|   " + c.toString(t -> pp.apply(t, unifier)));
+        writer.println("| unifier: " + state.unifier().toString());
+        writer.println("| completeness: " + completeness.toString());
+        writer.println("| constraints:");
+        for (IConstraint c : constraints) {
+            writer.println("|   " + c.toString(t -> prettyprinter.apply(t, unifier)));
         }
-        printLn.apply("| delays:");
-        for(java.util.Map.Entry<IConstraint, Delay> e : delays.entrySet()) {
-            printLn.apply("|   " + e.getValue() + " : " + e.getKey().toString(t -> pp.apply(t, unifier)));
+        writer.println("| delays:");
+        for (java.util.Map.Entry<IConstraint, Delay> e : delays.entrySet()) {
+            writer.println("|   " + e.getValue() + " : " + e.getKey().toString(t -> prettyprinter.apply(t, unifier)));
+        }
+        writer.println("| messages:");
+        for (java.util.Map.Entry<IConstraint, IMessage> e : messages.entrySet()) {
+            writer.println("|   - " + e.getValue().toString(ITerm::toString));
+            writer.println("|     " + e.getKey().toString(t -> prettyprinter.apply(t, unifier)));
         }
     }
-
-
 }

@@ -73,6 +73,13 @@ public final class SearchStrategies {
     }
 
     /**
+     * Search strategy that only succeeds if the search state has no errors.
+     *
+     * @return the resulting strategy
+     */
+    public static IsSuccessfulStrategy isSuccessful() { return new IsSuccessfulStrategy(); }
+
+    /**
      * Unfocuses.
      *
      * @return the resulting strategy

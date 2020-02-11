@@ -1,7 +1,21 @@
 package mb.statix.search;
 
+import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
+import mb.nabl2.terms.ITerm;
+import mb.nabl2.terms.ITermVar;
+import mb.nabl2.terms.unification.UnifierFormatter;
+import mb.nabl2.terms.unification.Unifiers;
+import mb.nabl2.terms.unification.ud.IUniDisunifier;
+import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
+import org.metaborg.util.functions.Action1;
+import org.metaborg.util.functions.Function2;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 
 /**
  * A focused search state.
@@ -35,6 +49,26 @@ public final class FocusedSearchState<C extends IConstraint> {
 
     public Set<IConstraint> getUnfocused() {
         return unfocused;
+    }
+
+    @Override public String toString() {
+        StringWriter out = new StringWriter();
+        PrintWriter writer = new PrintWriter(out);
+        try {
+            writer.println("FocusedSearchState:");
+            write(writer, (t, u) -> new UnifierFormatter(u, 2).format(t));
+        } catch (IOException e) {
+            // This can never happen.
+            throw new RuntimeException(e);
+        }
+        return out.toString();
+    }
+
+    public void write(PrintWriter writer, Function2<ITerm, IUniDisunifier, String> prettyprinter) throws IOException {
+        final IUniDisunifier unifier = getSearchState().getState().unifier();
+        writer.println("| focus:");
+        writer.println("|   " + focus.toString(t -> prettyprinter.apply(t, unifier)));
+        this.getSearchState().write(writer, prettyprinter);
     }
 
 }

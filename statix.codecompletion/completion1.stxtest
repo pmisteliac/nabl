@@ -1,13 +1,32 @@
 resolve {s e T e1 e2}
 
+//	// This does not work?
 	new s, typeOf(s, Let([
 		Bind("b", BOOL(), True()),
-		Bind("f", FUN([BOOL(), INT(), BOOL()], BOOL()), Fun([
-			Param("a", BOOL()),
+		Bind("f", FUN([e, INT(), INT()], INT()), Fun([
+			Param("a", INT()),
 			Param("b", INT()),
-			Param("c", BOOL())
-		], Var("a")))
-	], e)) == T
+			Param("c", INT())
+		], Plus(Var("a"), Var("c"))))
+	], Zero())) == BOOL()
+
+//	new s, typeOf(s, Let([
+//		Bind("b", BOOL(), True()),
+//		Bind("f", FUN([BOOL(), INT(), BOOL()], BOOL()), Fun([
+//			Param("a", BOOL()),
+//			Param("b", INT()),
+//			Param("c", BOOL())
+//		], Var("a")))
+//	], Plus(e2, e))) == T
+
+//	new s, typeOf(s, Let([
+//		Bind("b", BOOL(), True()),
+//		Bind("f", FUN([BOOL(), INT(), BOOL()], BOOL()), Fun([
+//			Param("a", BOOL()),
+//			Param("b", INT()),
+//			Param("c", BOOL())
+//		], Var("a")))
+//	], e)) == T
 
 //	new s, typeOf(s, Let([
 //		Bind("b", BOOL(), True())

@@ -16,10 +16,6 @@ public class TermPart implements IMessagePart, Serializable {
         this.term = term;
     }
 
-    @Override public String toString(TermFormatter formatter) {
-        return formatter.format(term);
-    }
-
     @Override public IMessagePart apply(ISubstitution.Immutable subst) {
         return new TermPart(subst.apply(term));
     }
@@ -29,11 +25,11 @@ public class TermPart implements IMessagePart, Serializable {
     }
 
     @Override public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(term);
-        sb.append("]");
-        return sb.toString();
+        return toString(ITerm::toString);
+    }
+
+    @Override public String toString(TermFormatter formatter) {
+        return formatter.format(term);
     }
 
 }

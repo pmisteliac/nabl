@@ -27,11 +27,13 @@ public final class InferStrategy implements Strategy<SearchState, SearchState, S
                 new NullDebugContext()
         );
 
-        if (result.hasErrors()) {
-            return Stream.empty();
-        } else {
+        // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
+
+//        if (result.hasErrors()) {
+//            return Stream.empty();
+//        } else {
             return Stream.of(SearchState.fromSolverResult(result, state.getExistentials()));
-        }
+//        }
     }
 
     @Override
